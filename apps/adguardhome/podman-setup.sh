@@ -21,12 +21,11 @@ echo "-> Running '$NAME' Container"
 # Network = rootlesskit by default using slirp4netns with flag for preserving IPs
     #--cap-add NET_RAW \
     #--userns keep-id   `# Reqd for Reading Config | Or Make files rootless` \
-# Rootless Mode
-    #--user $(id -u):$(id -g) \
 podman run \
  --detach \
  --restart unless-stopped \
  --label io.containers.autoupdate=registry \
+ --user $(id -u):$(id -g) \
  --network slirp4netns:port_handler=slirp4netns \
  -p 53:53/tcp       `# Plain DNS` \
  -p 53:53/udp       `# Plain DNS` \
