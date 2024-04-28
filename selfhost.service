@@ -1,0 +1,11 @@
+[Unit]
+Description=Starting Selfhosted Apps
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=%h/selfhost/scripts/systemd/service.sh start
+ExecStop=%h/selfhost/scripts/systemd/service.sh stop
+
+[Install]
+WantedBy=default.target
