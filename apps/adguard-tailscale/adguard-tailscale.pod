@@ -1,0 +1,12 @@
+[Pod]
+PodName=adguardhome-tailscale
+Network=slirp4netns:port_handler=slirp4netns
+PublishPort=53:53/tcp
+PublishPort=53:53/udp
+PublishPort=8080:80/tcp
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

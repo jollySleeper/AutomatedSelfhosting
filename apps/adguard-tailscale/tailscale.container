@@ -1,0 +1,18 @@
+[Unit]
+Description=tailscale
+
+[Container]
+AddCapability=net_admin sys_module
+AddDevice=/dev/net/tun:/dev/net/tun
+AutoUpdate=registry
+ContainerName=tailscale
+EnvironmentFile=%h/selfhost/apps/tailscale/environments/tailscale.env
+Image=docker.io/tailscale/tailscale:latest
+PodmanArgs=--cgroups split --cidfile /run/user/1001/tailscale.cid --pod adguard-tailscale
+Sysctl=net.ipv4.ip_forward=1
+Volume=%h/selfhost/apps/tailscale/configs/resolv.conf:/etc/resolv.conf:ro
+Volume=%h/selfhost/apps/tailscale/volumes/lib:/var/lib
+Volume=%h/selfhost/apps/tailscale/volumes/lib/tailscale:/var/lib/tailscale
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=adguardhome
+
+[Container]
+AutoUpdate=registry
+ContainerName=adguardhome
+Group=1001
+Image=docker.io/adguard/adguardhome:latest
+PodmanArgs=--pod adguard-tailscale
+User=1001
+Volume=%h/selfhost/apps/adguardhome/configs:/opt/adguardhome/conf
+Volume=%h/selfhost/apps/adguardhome/volumes/work:/opt/adguardhome/work
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
