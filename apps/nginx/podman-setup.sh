@@ -15,6 +15,7 @@ podman run \
  --detach \
  --restart unless-stopped \
  --label io.containers.autoupdate=registry \
+ --user $(id -u):$(id -g) \
  --network slirp4netns:port_handler=slirp4netns,allow_host_loopback=true `#Allows 127.0.0.1 of Host in Container` \
  -p 80:1080 \
  -p 443:1433 \
