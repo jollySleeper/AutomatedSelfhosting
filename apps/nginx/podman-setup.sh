@@ -22,6 +22,7 @@ podman run \
  -v "$(get_config_dir ${NAME})/rootless/nginx.conf":/etc/nginx/nginx.conf \
  -v "$(get_config_dir ${NAME})/rootless/nginx-confd-default.conf":/etc/nginx/conf.d/default.conf \
  -v "$(get_config_dir ${NAME})/snippets":/etc/nginx/snippets \
+ -v "$(get_config_dir ${NAME})/sites":/etc/nginx/conf.d \
  --name "$NAME" \
  "$IMAGE_SOURCE"
 
