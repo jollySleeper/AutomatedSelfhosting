@@ -11,6 +11,15 @@ echo "-> Making Required Directories"
 #mkdir -pv "$(get_vol_dir ${NAME})/lib/$NAME"
 
 echo "-> Running '$NAME' Container"
+# Slirp4netns: Working
+ #--network slirp4netns:allow_host_loopback=true `#Allows 127.0.0.1 of Host in Container` \
+ #--network slirp4netns:port_handler=slirp4netns,allow_host_loopback=true `#Allows 127.0.0.1 of Host in Container` \
+
+# Pasta: Not Working
+ #--network=pasta \
+ #--network=pasta:--map-gw \ # this is not working
+ #--network pasta:-a,10.0.2.0,-n,24,-g,10.0.2.2,--dns-forward,10.0.2.3,-T,8882 \
+
 podman run \
  --detach \
  --restart unless-stopped \
