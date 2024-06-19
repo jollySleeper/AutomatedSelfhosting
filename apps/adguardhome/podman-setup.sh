@@ -36,4 +36,7 @@ podman run \
  --name "$NAME" \
  "$IMAGE_SOURCE"
 
+# Generate NGINX Conf File
+action_based_on_query "generate-nginx-conf-file" "$NAME" "aevion" "lan" "8000" "http"
+ 
 echo "Done :)"
