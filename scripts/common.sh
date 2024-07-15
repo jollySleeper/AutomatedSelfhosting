@@ -28,6 +28,10 @@ function source_container() {
     source ${REL_DIR}/podman/container.sh
 }
 
+function source_image() {
+    source ${REL_DIR}/podman/image.sh
+}
+
 function generate_nginx_conf_file() {
     subdomain=${1}
     domain=${2}
