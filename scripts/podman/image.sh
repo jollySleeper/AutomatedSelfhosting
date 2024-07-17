@@ -19,7 +19,13 @@ function build_image() {
         podman build -f Dockerfile
         if [[ $? == 0 ]]; then
             podman tag $(podman images | awk '{print $3}' | awk 'NR==2') "$2"
+            echo "-> Deleting Image Used for Building"
+            remove_old_images
         fi
         rm Dockerfile
     fi
 }
+
+function remove_old_images() {
+    podman images --format '{{.Tag}},{{.ID}}' | grep '<none>' | cut -d ',' -f 2 | xargs podman rmi
+} 
