@@ -7,6 +7,8 @@ IMAGE_SOURCE="localhost/httpjamesm/$NAME:latest"
 
 action_based_on_query "$1-con" "$NAME" "$IMAGE_SOURCE"
 
+build_image "$NAME" "$IMAGE_SOURCE"
+
 echo "-> No Required Directories"
 
 echo "-> Running '$NAME' Container"
