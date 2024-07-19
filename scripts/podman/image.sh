@@ -11,6 +11,14 @@ function check_image () {
     fi 
 }
 
+function pull_image() {
+    check_image "$2"
+    if [[ ${status} != 0 ]]; then
+        echo "-> Pulling '$1' Image"
+        podman pull $2
+    fi
+}
+
 function build_image() {
     check_image "$2"
     if [[ ${status} != 0 ]]; then
