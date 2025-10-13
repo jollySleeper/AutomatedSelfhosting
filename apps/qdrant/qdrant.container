@@ -1,0 +1,15 @@
+[Unit]
+Description=qdrant
+
+[Container]
+AutoUpdate=registry
+ContainerName=qdrant
+Image=docker.io/qdrant/qdrant:latest
+PublishPort=6333:6333
+Volume=%h/selfhost/apps/qdrant/volumes/data:/qdrant/storage
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
