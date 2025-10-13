@@ -1,0 +1,24 @@
+[Unit]
+Description=cadvisor
+
+[Container]
+AddDevice=/dev/kmsg
+AutoUpdate=registry
+ContainerName=cadvisor
+Exec='--podman=unix:///var/run/podman/podman.sock' '--docker=unix://' '--housekeeping_interval=10s' '--docker_only=true'
+Image=gcr.io/cadvisor/cadvisor:v0.50.0
+PodmanArgs=--privileged
+PublishPort=9091:8080
+Volume=/:/rootfs:ro
+Volume=/dev/disk/:/dev/disk:ro
+Volume=/sys:/sys:ro
+Volume=/etc/machine-id:/etc/machine-id:ro
+Volume=/var/lib/dbus/machine-id:/var/lib/dbus/machine-id:ro
+Volume=/run/user/1001/podman:/var/run/podman:ro
+Volume=%h/.local/share/containers/:/var/lib/containers:ro
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
