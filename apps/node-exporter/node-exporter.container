@@ -1,0 +1,17 @@
+[Unit]
+Description=node-exporter
+
+[Container]
+AutoUpdate=registry
+ContainerName=node-exporter
+Exec='--path.rootfs=/host'
+Image=quay.io/prometheus/node-exporter:latest
+Network=host
+PodmanArgs=--pid host
+Volume=/:/host:ro,rslave
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
