@@ -1,0 +1,26 @@
+[Unit]
+Description=Calibre-Web-Automated - Automated eBook Management
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName=calibre-web-automated
+Image=docker.io/crocodilestick/calibre-web-automated:latest
+AutoUpdate=registry
+User=%U:%G
+
+EnvironmentFile=%h/selfhost/apps/calibre-web-automated/environments/local.env
+Environment=PUID=%U
+Environment=PGID=%G
+PublishPort=127.0.0.1:8083:8083/tcp
+
+Volume=%h/selfhost/apps/calibre-web-automated/volumes:/config
+Volume=%h/selfhost/apps/calibre-web-automated/volumes/book-ingest:/cwa-book-ingest
+Volume=%h/media/Books:/calibre-library
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
