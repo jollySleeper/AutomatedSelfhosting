@@ -1,0 +1,21 @@
+[Unit]
+Description=Calibre E-book Management Server
+Documentation=https://docs.linuxserver.io/images/docker-calibre/
+
+[Container]
+AutoUpdate=registry
+ContainerName=calibre
+EnvironmentFile=%h/selfhost/apps/calibre/environments/local.env
+Image=lscr.io/linuxserver/calibre:latest
+PublishPort=127.0.0.1:9080:8080
+PublishPort=127.0.0.1:9181:8181
+PublishPort=127.0.0.1:9081:8081
+PublishPort=127.0.0.1:9092:9090
+Volume=%h/selfhost/apps/calibre/volumes:/config
+Volume=%h/media/Books:/books
+
+[Service]
+# Restart=always  # Disabled for on-demand usage - uncomment to restore auto-restart
+
+[Install]
+WantedBy=default.target
