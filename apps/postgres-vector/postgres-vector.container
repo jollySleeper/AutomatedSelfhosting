@@ -1,0 +1,17 @@
+[Unit]
+Description=postgres-vector
+
+[Container]
+AutoUpdate=registry
+ContainerName=postgres-vector
+EnvironmentFile=%h/selfhost/apps/postgres-vector/environments/db.env
+Image=docker.io/tensorchord/pgvecto-rs:pg16-v0.2.1
+PublishPort=127.0.0.1:5432:5432
+Volume=%h/selfhost/apps/postgres-vector/volumes/data:/var/lib/postgresql/data
+Volume=%h/selfhost/apps/postgres-vector/scripts/multi-db-entrypoint.sh:/docker-entrypoint-initdb.d/entrypoint.sh
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
