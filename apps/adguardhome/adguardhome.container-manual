@@ -1,0 +1,55 @@
+# =============================================================================
+# adguardhome.container-manual — HAND-WRITTEN REFERENCE QUADLET
+# =============================================================================
+#
+# Purpose
+# -------
+# Canonical quadlet for AdGuardHome. NOT directly installed; see
+# qbittorrent.container-manual for the full explanation of the dual-file
+# pattern we use (auto-generated via podlet + hand-written reference for
+# diffing / emergency bootstrap).
+#
+# DO NOT EDIT without also updating podman-setup.sh.
+# See /docs/DNS_ARCHITECTURE.md and .cursor/rules/podman-dns-bypass.mdc.
+# =============================================================================
+
+[Unit]
+Description=adguardhome
+
+[Container]
+AutoUpdate=registry
+ContainerName=adguardhome
+# AGH's own /etc/resolv.conf. We want 1.1.1.1 ONLY (no self-reference to
+# 192.168.1.105) to avoid a chicken-and-egg bootstrap problem and cosmetic
+# self-loop. This DNS= entry is the only nameserver because
+# Environment=CONTAINERS_CONF=/dev/null (in [Service] below) disables
+# containers.conf defaults for this container.
+#
+# Note: AGH primarily uses `bootstrap_dns` from AdGuardHome.yaml for resolving
+# upstream DoH/DoT hostnames; /etc/resolv.conf only affects plain system
+# lookups (update checks, CGO resolver paths).
+DNS=1.1.1.1
+Group=1001
+HostName=adguardhome
+Image=docker.io/adguard/adguardhome:latest
+# pasta networking (default in Podman 5.x) — copies host IPs into the
+# container netns so real client IPs reach AGH for per-device stats/filtering.
+Network=pasta
+PublishPort=53:53/tcp
+PublishPort=53:53/udp
+PublishPort=127.0.0.1:8000:8000/tcp
+User=1001
+Volume=%h/selfhost/apps/adguardhome/configs:/opt/adguardhome/conf
+Volume=%h/selfhost/apps/adguardhome/volumes/work:/opt/adguardhome/work
+
+[Service]
+Restart=always
+# Tells systemd to invoke podman WITHOUT loading containers.conf, so the
+# DNS= entry in [Container] above is the SOLE nameserver in AGH's
+# /etc/resolv.conf (avoids 192.168.1.105 self-reference).
+# Podman 5.x APPENDS --dns/DNS= to containers.conf dns_servers rather than
+# overriding — this env var is the only clean workaround.
+Environment=CONTAINERS_CONF=/dev/null
+
+[Install]
+WantedBy=default.target
