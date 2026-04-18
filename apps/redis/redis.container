@@ -1,0 +1,14 @@
+[Unit]
+Description=redis
+
+[Container]
+AutoUpdate=registry
+ContainerName=redis
+Image=docker.io/valkey/valkey:alpine
+PublishPort=127.0.0.1:6379:6379
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
