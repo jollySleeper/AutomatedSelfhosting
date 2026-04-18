@@ -1,0 +1,16 @@
+[Unit]
+Description=biblioreads
+
+[Container]
+AutoUpdate=registry
+ContainerName=biblioreads
+Group=1001
+Image=docker.io/nesaku/biblioreads:latest
+PublishPort=127.0.0.1:8017:3000
+User=1001
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
