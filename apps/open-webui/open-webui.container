@@ -1,0 +1,16 @@
+[Unit]
+Description=open-webui
+
+[Container]
+AutoUpdate=registry
+ContainerName=open-webui
+Image=ghcr.io/open-webui/open-webui:main
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=127.0.0.1:8888:8080
+Volume=%h/selfhost/apps/open-webui/volumes/data:/app/backend/data
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
