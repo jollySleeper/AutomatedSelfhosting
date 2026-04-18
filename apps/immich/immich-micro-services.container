@@ -1,0 +1,19 @@
+[Unit]
+Description=immich-micro-services
+
+[Container]
+AutoUpdate=registry
+ContainerName=immich-micro-services
+EnvironmentFile=%h/selfhost/apps/immich/environments/server.env
+Exec=start.sh microservices
+Image=ghcr.io/immich-app/immich-server:release
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=3002:3002
+Volume=%h/media/Photos:/usr/src/app/photos
+Volume=%h/media/Photos/Immich:/usr/src/app/upload
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

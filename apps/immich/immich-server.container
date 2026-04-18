@@ -1,0 +1,19 @@
+[Unit]
+Description=immich-server
+
+[Container]
+AutoUpdate=registry
+ContainerName=immich-server
+EnvironmentFile=%h/selfhost/apps/immich/environments/server.env
+Exec=start.sh immich
+Image=ghcr.io/immich-app/immich-server:release
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=3001:3001
+Volume=%h/media/Photos:/usr/src/app/photos
+Volume=%h/media/Photos/Immich:/usr/src/app/upload
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

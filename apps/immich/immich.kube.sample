@@ -1,0 +1,19 @@
+[Unit]
+Description=immich stack via Quadlet Kube (sample)
+After=network-online.target
+Wants=network-online.target
+
+# Generate Kubernetes YAML from a running set of containers or compose
+#   podman kube generate <pod_or_containers> > %h/selfhost/apps/immich/immich.yaml
+# Then set Yaml= to that file below.
+[Kube]
+Yaml=%h/selfhost/apps/immich/immich.yaml
+AutoUpdate=registry
+# Generate with: podman kube generate immich-server immich-machine-learning immich-postgres immich-redis > immich.yaml
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
