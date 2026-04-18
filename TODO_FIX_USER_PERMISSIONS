@@ -1,0 +1,104 @@
+# TODO: Fix User Permissions in Podman Containers
+
+## Overview
+
+This document tracks the migration from `--user $(id -u):$(id -g)` to `--userns keep-id --group-add $(id -g)` for better security and proper user namespace isolation.
+
+## Background
+
+### Current vs Recommended Approach
+
+**Old Approach:**
+```bash
+--user $(id -u):$(id -g)
+```
+- Explicitly sets UID/GID inside container to match host user
+- Simple but lacks full user namespace isolation
+- May not preserve group memberships properly
+
+**New Approach:**
+```bash
+--userns keep-id \
+--group-add $(id -g)
+```
+- Creates proper user namespace mapping
+- Better security through isolation
+- Only adds the primary group (legion/1001) instead of all supplementary groups
+- Cleaner permission handling (no need for 777 permissions on volumes)
+
+### Benefits of Migration
+1. **Security**: Better isolation through user namespaces
+2. **Permissions**: No need to chmod 777 volumes when using `--userns keep-id`
+3. **Consistency**: Follows modern Podman best practices
+4. **Group Control**: Explicit control over which groups are added to containers
+
+## Services to Update
+
+### Priority: High (Simple replacements)
+- [ ] `wger` - Basic web app, safe to migrate
+- [ ] `beaverhabits` - Basic web app, safe to migrate
+- [ ] `rimgo` - Basic web app, safe to migrate
+- [ ] `redlib` - Basic web app, safe to migrate
+- [ ] `anonymousoverflow` - Basic web app, safe to migrate
+- [ ] `biblioreads` - Basic web app, safe to migrate
+- [ ] `hyperpipe` - Basic web app, safe to migrate
+- [ ] `dumb` - Basic web app, safe to migrate
+- [ ] `libmedium` - Basic web app, safe to migrate
+- [ ] `quetre` - Basic web app, safe to migrate
+
+### Priority: Medium (May need testing)
+- [ ] `nginx` - Web server, ensure config access works
+- [ ] `libremdb` - Media app, check volume permissions
+- [ ] `navidrome` - Music server, test file access
+- [ ] `audiobookshelf` - Audio app, verify library access
+- [ ] `piped` (both versions) - Video proxy, test functionality
+
+### Priority: Low (Complex or special cases)
+- [ ] `adguard-tailscale` - Network service, may need special handling
+- [ ] `adguardhome` - DNS service, currently commented `--userns keep-id` with note about config access
+- [ ] `syncthing` - Currently uses BOTH flags (redundant), can simplify to just `--userns keep-id --group-add $(id -g)`
+
+## Migration Pattern
+
+For each service, replace:
+```bash
+--user $(id -u):$(id -g) \
+```
+
+With:
+```bash
+--userns keep-id \
+--group-add $(id -g) \
+```
+
+### Example: filebrowser migration
+**Before:**
+```bash
+podman run \
+ --user $(id -u):$(id -g) \
+ # ... other options
+```
+
+**After:**
+```bash
+podman run \
+ --userns keep-id \
+ --group-add $(id -g) \
+ # ... other options
+```
+
+**Additional cleanup:** Remove `chmod -R 777` lines from volume setup as they're no longer needed.
+
+## Testing Checklist
+
+For each migrated service:
+- [ ] Container starts successfully
+- [ ] Volume permissions work correctly
+- [ ] Service functionality is preserved
+- [ ] No permission errors in logs
+
+## Notes
+
+- Some services may need additional groups (like video/audio for GPU access) - add them explicitly with additional `--group-add` flags
+- Services requiring privileged access or special permissions may need different handling
+- Always test thoroughly before deploying to production
