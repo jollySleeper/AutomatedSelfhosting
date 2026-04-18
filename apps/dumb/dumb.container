@@ -1,0 +1,16 @@
+[Unit]
+Description=dumb
+
+[Container]
+AutoUpdate=registry
+ContainerName=dumb
+Group=1001
+Image=ghcr.io/rramiachraf/dumb:latest
+PublishPort=127.0.0.1:8016:5555
+User=1001
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
