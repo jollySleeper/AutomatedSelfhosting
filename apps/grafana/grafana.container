@@ -1,0 +1,16 @@
+[Unit]
+Description=grafana
+
+[Container]
+AutoUpdate=registry
+ContainerName=grafana
+Image=docker.io/grafana/grafana-oss:latest
+Network=pasta:--map-host-loopback,10.0.2.2
+PodmanArgs=--cgroups split --cidfile /run/user/1001/grafana.cid
+PublishPort=3300:3000
+Volume=%h/selfhost/apps/grafana/volumes/data:/var/lib/grafana
+Volume=%h/selfhost/apps/grafana/configs/grafana.ini:/etc/grafana/grafana.ini
+Volume=%h/selfhost/apps/grafana/configs/grafana.ini:/etc/grafana/grafana2.ini
+
+[Install]
+WantedBy=default.target
