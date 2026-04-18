@@ -1,0 +1,26 @@
+[Unit]
+Description=libremdb
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Container]
+AutoUpdate=registry
+ContainerName=libremdb
+Image=ghcr.io/zyachel/libremdb:main
+EnvironmentFile=%h/selfhost/apps/libremdb/environments/local.env
+Userns=keep-id
+Network=pasta
+PublishPort=127.0.0.1:8015:3000/tcp
+HealthCmd=/usr/bin/curl --fail http://127.0.0.1:3000/ || exit 1
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=30s
+HealthOnFailure=kill
+
+[Service]
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=default.target
