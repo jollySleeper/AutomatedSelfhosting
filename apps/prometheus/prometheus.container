@@ -1,0 +1,17 @@
+[Unit]
+Description=prometheus
+
+[Container]
+AutoUpdate=registry
+ContainerName=prometheus
+Image=quay.io/prometheus/prometheus:latest
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=9090:9090
+Volume=%h/selfhost/apps/prometheus/configs/prometheus.yml:/etc/prometheus/prometheus.yml
+Volume=%h/selfhost/apps/prometheus/volumes/data:/prometheus
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
