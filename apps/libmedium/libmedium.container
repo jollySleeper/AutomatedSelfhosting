@@ -1,0 +1,26 @@
+[Unit]
+Description=libmedium
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Container]
+AutoUpdate=registry
+ContainerName=libmedium
+Image=docker.io/realaravinth/libmedium:latest
+Userns=keep-id
+Network=pasta
+PublishPort=127.0.0.1:8014:7000/tcp
+Volume=%h/selfhost/apps/libmedium/configs/local.toml:/etc/libmedium/config.toml
+HealthCmd=/usr/bin/curl --fail http://127.0.0.1:7000/ || exit 1
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=30s
+HealthOnFailure=kill
+
+[Service]
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=default.target
