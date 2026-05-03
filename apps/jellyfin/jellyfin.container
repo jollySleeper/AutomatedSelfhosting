@@ -1,0 +1,26 @@
+[Unit]
+Description=jellyfin
+
+[Container]
+AddDevice=/dev/dri:/dev/dri
+AddDevice=/dev/dma_heap:/dev/dma_heap
+AddDevice=/dev/mali0:/dev/mali0
+AddDevice=/dev/rga:/dev/rga
+AddDevice=/dev/mpp_service:/dev/mpp_service
+Annotation=run.oci.keep_original_groups=1
+AutoUpdate=registry
+ContainerName=jellyfin
+HostName=jellyfin
+Image=ghcr.io/jellyfin/jellyfin:latest
+PodmanArgs=--entrypoint /entrypoint.sh --privileged
+PublishPort=127.0.0.1:8041:8096/tcp
+Volume=%h/selfhost/apps/jellyfin/volumes/config:/config
+Volume=%h/selfhost/apps/jellyfin/volumes/cache:/cache
+Volume=%h/media:/media
+Volume=%h/selfhost/apps/jellyfin/scripts/entrypoint-root.sh:/entrypoint.sh
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
