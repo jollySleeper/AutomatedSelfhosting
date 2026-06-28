@@ -1,0 +1,17 @@
+[Unit]
+Description=nitter
+
+[Container]
+AutoUpdate=registry
+ContainerName=nitter
+EnvironmentFile=%h/selfhost/apps/nitter/environments/nitter2.env
+Image=ghcr.io/sekai-soft/nitter-self-contained:latest
+Network=pasta
+PodmanArgs=--cgroups split --cidfile /run/user/1001/nitter.cid
+PublishPort=127.0.0.1:8018:8080
+Volume=%h/selfhost/apps/nitter/environments/nitter.env:/src/.env
+Volume=%h/selfhost/apps/nitter/configs/nitter.conf:/src/nitter.conf
+Volume=%h/selfhost/apps/nitter/volumes/data:/nitter-data
+
+[Install]
+WantedBy=default.target
