@@ -11,6 +11,7 @@ echo "-> No Required Directories"
 
 echo "-> Running '$NAME' Container"
 podman run \
+ --replace \
  --detach \
  --restart unless-stopped \
  --label io.containers.autoupdate=registry \
@@ -20,6 +21,9 @@ podman run \
  --name "$NAME" \
  "$IMAGE_SOURCE"
 
-action_based_on_query "generate-nginx-conf-file" "$NAME" "aevion" "lan" "8013" "http"
+action_based_on_query "generate-con-quadlet" "$NAME"
+action_based_on_query "install-con-quadlet" "$NAME" "$NAME"
+
+# action_based_on_query "generate-nginx-conf-file" "$NAME" "aevion" "lan" "8013" "http"
 
 echo "Done :)"
