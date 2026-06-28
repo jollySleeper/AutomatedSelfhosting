@@ -1,0 +1,15 @@
+[Unit]
+Description=flaresolverr
+
+[Container]
+AutoUpdate=registry
+ContainerName=flaresolverr
+EnvironmentFile=%h/selfhost/apps/flaresolverr/environments/local.env
+Image=ghcr.io/flaresolverr/flaresolverr:latest
+PublishPort=127.0.0.1:8191:8191
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
