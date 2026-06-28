@@ -1,0 +1,63 @@
+# =============================================================================
+# qbittorrent.container-manual — HAND-WRITTEN REFERENCE QUADLET
+# =============================================================================
+#
+# Purpose
+# -------
+# This is the *canonical* quadlet for qBittorrent. It is NOT installed by
+# podman-setup.sh (the live quadlet at ~/.config/containers/systemd/ is a
+# symlink to the auto-generated qbittorrent.container instead).
+#
+# This file exists so that:
+#
+#   1) Humans can read a clean, fully-commented version of the intended
+#      quadlet without wading through podlet-generated terseness.
+#
+#   2) Any drift between the auto-generated qbittorrent.container and
+#      this file is reviewable in a normal `diff` during PRs. If podlet's
+#      output diverges (e.g. Podman upgrade changes field naming), the
+#      diff flags it.
+#
+# When to use this file
+# ---------------------
+#   - After a Podman major upgrade: diff against the freshly-generated file.
+#   - Onboarding / audits: read this file first, then cross-check with the
+#     generated one.
+#   - Emergency bootstrap: if podlet is broken, `cp qbittorrent.container-manual
+#     ~/.config/containers/systemd/qbittorrent.container` gets us running.
+#
+# DO NOT EDIT without also updating podman-setup.sh (they must stay in sync).
+# See /docs/DNS_ARCHITECTURE.md and .cursor/rules/podman-dns-bypass.mdc.
+# =============================================================================
+
+[Unit]
+Description=qbittorrent
+
+[Container]
+AutoUpdate=registry
+ContainerName=qbittorrent
+# DNS= entries are the ONLY nameservers qBT sees because
+# Environment=CONTAINERS_CONF=/dev/null (in [Service]) tells podman to ignore
+# containers.conf's dns_servers = ["192.168.1.105"] (AGH). Without that env
+# var, Podman 5.x APPENDS containers.conf dns_servers before these, giving
+# qBT three nameservers: 192.168.1.105, 1.1.1.1, 9.9.9.9 — and Alpine/musl
+# queries them all in parallel, so AGH's tracker sinkhole can win the race.
+DNS=1.1.1.1
+DNS=9.9.9.9
+EnvironmentFile=%h/selfhost/apps/qbittorrent/environments/local.env
+Image=ghcr.io/linuxserver/qbittorrent:latest
+PublishPort=127.0.0.1:8061:8061
+PublishPort=6881:6881
+PublishPort=6881:6881/udp
+Volume=%h/selfhost/apps/qbittorrent/volumes/config:/config
+Volume=%h/media/Downloads:/downloads
+
+[Service]
+Restart=always
+# Makes systemd invoke podman WITHOUT loading containers.conf, so the DNS=
+# entries in [Container] above become the only nameservers in the container's
+# /etc/resolv.conf. See the comment on DNS= above and /docs/DNS_ARCHITECTURE.md.
+Environment=CONTAINERS_CONF=/dev/null
+
+[Install]
+WantedBy=default.target
