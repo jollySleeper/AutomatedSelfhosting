@@ -1,0 +1,17 @@
+[Unit]
+Description=quetre
+
+[Container]
+AutoUpdate=registry
+ContainerName=quetre
+EnvironmentFile=%h/selfhost/apps/quetre/environments/prod-http.env
+Group=1001
+Image=codeberg.org/video-prize-ranch/quetre:latest
+PublishPort=127.0.0.1:8012:3000
+User=1001
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

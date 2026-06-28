@@ -20,6 +20,9 @@ podman run \
  --name "$NAME" \
  "$IMAGE_SOURCE"
 
+action_based_on_query "generate-con-quadlet" "$NAME"
+action_based_on_query "install-con-quadlet" "$NAME" "$NAME"
+
 action_based_on_query "generate-nginx-conf-file" "$NAME" "aevion" "lan" "8012" "http"
 
 echo "Done :)"
