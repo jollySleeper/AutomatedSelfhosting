@@ -1,0 +1,14 @@
+[Unit]
+Description=ariang
+
+[Container]
+AutoUpdate=registry
+ContainerName=ariang
+Image=docker.io/p3terx/ariang:latest
+PublishPort=127.0.0.1:8063:6880
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

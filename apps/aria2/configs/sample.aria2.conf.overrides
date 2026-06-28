@@ -1,0 +1,84 @@
+# aria2.conf overrides — REFERENCE / SAMPLE
+# ─────────────────────────────────────────────────────────────────────────────
+# Image:  docker.io/p3terx/aria2-pro
+# Docs:   https://aria2.github.io/manual/en/html/aria2c.html#options
+# Source of truth for the FULL conf the image generates:
+#         https://github.com/P3TERX/aria2.conf/blob/master/aria2.conf
+#
+# How this file is used
+# ─────────────────────
+# `apps/aria2/podman-setup.sh` reads `local.aria2.conf.overrides` (NOT this
+# sample) line by line and, for every `key=value` line, either:
+#   - replaces the matching `^key=` line in the container's /config/aria2.conf
+#   - or appends `key=value` if no such line exists.
+# The container is then restarted so the new values take effect.
+# Re-running setup is idempotent (the file IS the source of truth).
+#
+# Why we override anything at all
+# ───────────────────────────────
+# The p3terx image generates /config/aria2.conf on first start with sensible
+# but opinionated defaults. A few of them don't suit our use case — most
+# importantly `force-save=false`, which silently drops AriaNg's stopped/
+# completed/error history on every container restart. Rather than commit a
+# full ~80-line aria2.conf and have to re-merge upstream changes forever,
+# we only commit the small set of keys we want to enforce.
+#
+# Format
+# ──────
+#   - One `key=value` per line (no spaces around `=`)
+#   - Lines starting with `#` and blank lines are ignored
+#   - Unknown keys are simply appended — aria2 will reject any it doesn't know
+#     at startup, so test your changes
+#
+# Copy this file to `local.aria2.conf.overrides` and uncomment what you need.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── Stopped-task history persistence (highly recommended) ────────────────────
+
+# By default the image sets `force-save=false`, meaning only active+waiting
+# downloads are written to /config/aria2.session. Any aria2 restart (auto-
+# update via Quadlet, host reboot, redeploy) therefore wipes the entire
+# stopped queue from RAM and AriaNg's "Stopped" tab goes blank.
+# Setting this to true makes aria2 also persist completed/error/removed
+# tasks, so history survives restarts. Default: false.
+force-save=true
+
+# Max number of stopped tasks aria2 keeps in its in-memory ring buffer (and
+# therefore visible to AriaNg). Older entries fall off when this is
+# exceeded. Default: 1000. Bumping it costs only a few MB of RAM.
+max-download-result=10000
+
+
+# ── Common tunables (commented out — uncomment to enforce in local file) ────
+
+# Max simultaneous downloads. Image default: 5.
+#max-concurrent-downloads=10
+
+# Per-server connection cap for HTTP/FTP downloads. Image default: 32.
+#max-connection-per-server=16
+
+# Min split size when splitting a single download across connections.
+# Image default: 4M.
+#min-split-size=4M
+
+# Disk write cache to reduce I/O. Image default comes from the DISK_CACHE
+# env var in `environments/local.env` (we set 64M there).
+#disk-cache=128M
+
+# Global upload speed limit for BitTorrent (bytes/s, K/M suffix OK).
+# Image default: 2M. Increase if you want to seed faster.
+#max-overall-upload-limit=4M
+
+# Seconds to seed after BT completion. 0 = forever (until ratio is met).
+# Image default: 0.
+#seed-time=0
+
+# Stop seeding once this share ratio is reached. 0.0 = no ratio limit.
+# Image default: 1.0.
+#seed-ratio=2.0
+
+# Allow overwrite of existing files instead of auto-renaming with `.N`.
+# Image default: false (auto-renames to foo.1.mkv etc).
+#allow-overwrite=false
+#auto-file-renaming=true
