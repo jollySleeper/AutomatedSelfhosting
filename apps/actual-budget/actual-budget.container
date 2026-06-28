@@ -1,0 +1,18 @@
+[Unit]
+Description=actual-budget
+
+[Container]
+AutoUpdate=registry
+ContainerName=actual-budget
+EnvironmentFile=%h/selfhost/apps/actual-budget/environments/local.env
+Image=docker.io/actualbudget/actual-server:latest
+PodmanArgs=--group-add 1001
+PublishPort=127.0.0.1:8055:5006
+UserNS=keep-id
+Volume=%h/selfhost/apps/actual-budget/volumes/data:/data
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
