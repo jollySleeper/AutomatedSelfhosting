@@ -1,0 +1,93 @@
+---
+description: Podman --dns bypass pattern — works around the Podman 5.x --dns append-not-override quirk by using CONTAINERS_CONF=/dev/null so per-container --dns flags become authoritative. Apply only to containers that must NOT resolve through AdGuardHome.
+globs: ["apps/**/podman-setup.sh", "apps/**/*.container", "apps/**/*.container-manual", "podman/containers.conf"]
+autoApply: true
+---
+
+# Podman DNS Bypass Pattern
+
+Workaround for the Podman 5.x `--dns` append-not-override quirk, used when a
+container **must not** resolve through AdGuardHome.
+
+Read `docs/DNS_ARCHITECTURE.md` in the repo root for the full narrative. For
+the related `<service>.container-manual` reference-file convention, see the
+sister rule `dual-quadlet-pattern.mdc`.
+
+## The Podman `--dns` append-not-override quirk
+
+Podman 5.4.1 (verified on aevion) **appends** `--dns` values to
+`containers.conf` `dns_servers` instead of overriding them. This contradicts
+the Podman manpage which says `--dns` overrides.
+
+Proof (run on aevion):
+
+```bash
+# containers.conf has dns_servers = ["192.168.1.105"]
+podman run --rm --dns 1.1.1.1 alpine cat /etc/resolv.conf
+# nameserver 192.168.1.105
+# nameserver 1.1.1.1        ← both appear
+
+CONTAINERS_CONF=/dev/null podman run --rm --dns 1.1.1.1 alpine cat /etc/resolv.conf
+# nameserver 1.1.1.1        ← ONLY this, as desired
+```
+
+This matters especially for **Alpine/musl-based images** (most LinuxServer
+images, AdGuard, etc.). Musl's resolver queries ALL nameservers in parallel;
+whichever responds first wins. So a container whose resolv.conf has both AGH
+(`192.168.1.105`) and a public resolver (`1.1.1.1`) is in a non-deterministic
+race — AGH's sinkhole IP for a blocked domain can beat a legitimate answer
+from `1.1.1.1`.
+
+## When to use the bypass
+
+Apply the `CONTAINERS_CONF=/dev/null` bypass when **both** are true:
+
+1. The container must NOT use AGH (tracker false positives, AGH's own
+   bootstrap preventing self-reference, etc.).
+2. The image's libc behavior (musl, or glibc with parallel queries) makes
+   having AGH anywhere in resolv.conf a correctness risk.
+
+Do NOT apply it "just in case". Every service that should be filtered by AGH
+must stay on the default (`dns_servers` from `podman/containers.conf`).
+
+## How to apply the bypass (three required pieces)
+
+In the service's `podman-setup.sh`:
+
+```bash
+# 1) Prefix the podman run invocation with the env override. This makes the
+#    INITIAL container created during install have the right resolv.conf.
+CONTAINERS_CONF=/dev/null podman run \
+ ...
+ --dns 1.1.1.1 \
+ --dns 9.9.9.9 \
+ ...
+
+# 2) After podlet generates the quadlet, inject the same env var into the
+#    [Service] section so SUBSEQUENT systemd restarts apply it too.
+action_based_on_query "generate-con-quadlet" "$NAME"
+action_based_on_query "inject-quadlet-env" "$NAME" "Environment=CONTAINERS_CONF=/dev/null"
+action_based_on_query "install-con-quadlet" "$NAME" "$NAME"
+```
+
+The `inject-quadlet-env` action is defined in `scripts/podman/container.sh`
+(`inject_env_into_quadlet`). It is idempotent (re-running `podman-setup.sh`
+won't duplicate the line) and uses `awk` for portability.
+
+3) Document the bypass inline with a pointer to `docs/DNS_ARCHITECTURE.md`.
+
+## Because this is a quadlet-level directive, also add a manual reference file
+
+Any service using this bypass MUST also have a `<service>.container-manual`
+file committed alongside the auto-generated `<service>.container` — because
+the `Environment=CONTAINERS_CONF=/dev/null` line is injected post-generation
+and is easy to miss in diffs. See `dual-quadlet-pattern.mdc`.
+
+## Related code paths
+
+- `scripts/podman/container.sh` → `inject_env_into_quadlet()`
+- `scripts/common.sh` → case `"inject-quadlet-env")`
+- `podman/containers.conf` → global `dns_servers`
+- `apps/qbittorrent/podman-setup.sh` → reference implementation (AGH-filtered trackers)
+- `apps/adguardhome/podman-setup.sh` → reference implementation (self-reference avoidance)
+- `docs/DNS_ARCHITECTURE.md` → full story

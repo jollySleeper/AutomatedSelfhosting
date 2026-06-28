@@ -1,0 +1,70 @@
+---
+description: Coding and scripting guidelines for SelfHost project
+globs: ["**/*.sh", "**/*.container", "**/podman-setup.sh", "scripts/**/*"]
+autoApply: true
+---
+
+# SelfHost Coding & Scripting Guidelines
+
+## Project File Organization
+- **App Structure**: Each service in `apps/` must have: `podman-setup.sh`, `*.container` files, `environments/`, `configs/`, and `README.md`
+- **Script Naming**: All setup scripts must be named `podman-setup.sh` (not `setup.sh` or variations)
+- **Environment Files**: Use `environments/` directory with `.env` files (never commit secrets)
+- **Config Files**: Application configs go in `configs/` directory, mounted as read-only volumes
+- **Documentation**: Every service must have a README.md explaining setup and configuration
+
+## Shell Scripts
+- Use bash, include error handling with `set -euo pipefail`
+- Use consistent logging format: `echo "[$(date)] INFO: message"`
+- Check exit codes, provide meaningful error messages
+- Never hardcode secrets, use environment variables
+- Add comments for complex logic, update READMEs
+- Test scripts with `bash -n` for syntax, run in dry-run mode if available
+
+## Container Definitions
+- Follow naming convention: `<service>.container`
+- Use rootless containers where possible (all containers run as non-root users)
+- Set appropriate resource limits (CPU/memory)
+- Mount volumes consistently with project structure
+- Include health checks when possible
+- Managed by systemd user services (not system services)
+- **User Permissions**: Use `--userns keep-id --group-add $(id -g)` for proper isolation (see Security Practices)
+
+## PUID/PGID Environment Variables
+- **LinuxServer Containers**: Use `PUID=$(id -u)` and `PGID=$(id -g)` for file permissions
+- **Do not force --user**: Let containers handle user switching internally via PUID/PGID
+- **Dynamic Assignment**: Set PUID/PGID dynamically in podman-setup.sh, document in env files
+- **Permission Issues**: PUID/PGID resolve most file permission problems in mounted volumes
+- **Note**: For non-LinuxServer containers, prefer `--userns keep-id --group-add $(id -g)` over PUID/PGID
+
+## Environment Variables
+- Use `.env` files for configuration
+- Never commit secrets or private keys
+- Follow naming pattern: `SERVICE_NAME_VAR`
+- Document required vs optional variables
+- **No inline comments**: Comments after variable values can break parsing (e.g., `VAR=value # comment` fails)
+- Use separate comment lines above variables instead: `# Comment here\nVAR=value`
+- **Validation Required**: Test that environment variables actually work as documented (don't assume functionality)
+- **Sample + Local pattern**: Every service must have `sample.env` (all possible vars with docs) and `local.env` (only overrides)
+- **Sample env format**: Header with image/docs URL, `# ── Section ──` grouping, every var documented with default, secrets use `changeme`
+
+## Port Allocation
+- Use ports in 8000-8888 range
+- Document port usage in service READMEs
+- Check for conflicts before allocation with `ss -tlnp | grep :PORT`
+- Update NGINX configuration for new ports
+- **Internal Port Verification**: Ensure container services are actually listening on mapped internal ports
+- **Port Ranges**: 8000-8019 (privacy frontends), 8020-8029 (Piped), 8030-8039 (sync/utilities), 8040-8049 (media servers), 8050-8059 (fitness/productivity), 8060-8069 (*arr stack), 8070-8079 (media add-ons), 8080-8089 (books), 8888 (AI), 8191 (internal proxies)
+- **Canonical Port Reference**: `apps/nginx/README.md` is the source of truth for all port assignments
+
+## Port Binding Strategies
+- **Reverse Proxy**: Use `${LOCALHOST_IP}` binding (e.g., `127.0.0.1:8080:80`) for NGINX access
+- **Direct LAN Access**: Remove IP binding (e.g., `8080:80`) to expose to entire LAN
+- **Security Consideration**: LAN exposure increases attack surface, ensure authentication is enabled
+
+## Security Best Practices
+- Run all services as non-root where possible
+- Use internal networks for service-to-service communication
+- Restrict external access through NGINX configurations
+- Regularly update container images and system packages
+- Use environment variables for secrets management

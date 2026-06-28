@@ -1,0 +1,105 @@
+---
+description: Deployment and testing procedures for SelfHost services
+globs: ["**/podman-setup.sh", "**/*.container", "scripts/**/*"]
+manualApply: true
+---
+
+# Deployment & Testing Procedures
+
+## Script-Based Deployment (Required)
+- **Edit Scripts, Not Quadlet Files**: Always modify `podman-setup.sh` scripts and run them - quadlet files are auto-generated
+- **Scripts Generate Quadlets**: Running `podman-setup.sh` automatically creates/updates `.container` quadlet files
+- **Quadlet Files Are Generated**: Never edit `.container` files directly - they are output from scripts
+- **Why This Approach?**: Scripts ensure consistent deployment, proper quadlet generation, and automatic systemd integration
+- **Manual Commands Only For Debugging**: Use direct podman/systemctl commands only when scripts don't support operations
+
+## Local Testing Workflow
+- Deploy containers locally before server deployment
+- Check port availability with `ss -tlnp | grep :PORT`
+- Verify container health with `podman ps` and `podman logs <container>`
+- Test NGINX config with `nginx -t` after configuration changes
+- Verify reverse proxy routing works correctly
+- **File Synchronization**: Copy local changes to server with `scp` before testing
+- **Internal Port Verification**: Check if services are actually listening with `podman exec <container> ss -tlnp`
+- **Nginx Config Generation**: The `generate-nginx-conf-file` command in podman-setup.sh creates correct nginx configurations
+
+## Server Deployment Workflow
+- **Repository Location**: SelfHost repository is at `~/selfhost/` on `legion@aevion`
+- **File Transfer**: Use `scp <local-path> legion@aevion:~/selfhost/<remote-path>` for config updates
+- **Service Restart**: Use `systemctl --user restart <service-name>` after config changes
+- **Verification**: Check `systemctl --user status <service-name>` and `podman logs <container-name>`
+- **Quadlet Updates**: Run `podman-setup.sh` scripts on server when changing container definitions
+- **Systemd Reload**: Run `systemctl --user daemon-reload` after quadlet file changes
+
+## Service Integration Testing
+- **Check Container Logs First**: Always review `podman logs <container>` before testing endpoints to confirm service is running properly
+  - Look for: successful initialization, "[ls.io-init] done.", service startup messages
+  - Common issues: permission errors, missing dependencies, database connection failures
+- **Endpoint Testing**: Test direct container ports before reverse proxy
+- Test service accessibility via configured subdomains
+- Verify SSL certificate functionality
+- Check service interdependencies
+- Validate environment variable loading
+- Test service startup and shutdown procedures
+- **LinuxServer Containers**: Always verify official documentation for version-specific changes
+- **HTTPS Requirements**: Check for mandatory HTTPS in newer container versions
+
+## Image Source Resolution
+- **Verify Image Availability**: Check `podman search <image>` or Docker Hub for correct image names
+- **Official vs Community Images**: Prefer official images, but use community images when official don't exist
+- **LinuxServer Alternative**: When LinuxServer images aren't available, search Docker Hub for alternatives
+- **Tag Selection**: Use `latest` for production, specific tags for stability
+
+## Container Configuration
+- **User Management**: Check official documentation for preferred user handling method
+  - LinuxServer containers typically use PUID/PGID environment variables instead of `--user` flag
+  - Community containers may require `--user` flag or have different user handling approaches
+  - Always verify documentation before choosing between PUID/PGID vs `--user` flag
+  - If documentation is unclear or conflicting, ask user for clarification on preferred method
+- **Required Environment Variables**: Always check official docs for mandatory env vars (TZ, PUID, PGID)
+- **Volume Permissions**: Containers handle their own permissions when using proper user management
+- **Port Binding**: Use `127.0.0.1:port` for reverse proxy, avoid host networking unless required
+- **Container Networking**: Understand how containers communicate
+  - Containers in different network modes use different IP addressing
+  - podman containers may use 10.0.2.2 as gateway to reach host services
+  - Always verify container networking when configuring reverse proxy upstream IPs
+- **Service-Specific Setup**: Some containers need special volume structures or initialization (e.g., book ingest folders)
+
+## Common Deployment Tasks
+- **Add New Service**: Follow the selfhost-service skill (`.cursor/skills/selfhost-service/SKILL.md`) or copy existing app structure
+- **Update Images**: Use `scripts/update_images.sh` for container updates
+- **Monitor Services**: Check via Grafana/Prometheus dashboards, Jellystat for media analytics
+- **Network Changes**: Update Tailscale configurations as needed
+- **Bulk Service Deploy**: Use `mask` tasks (see `maskfile.md`) for starting/stopping all services
+
+## Service Management
+- **All services run as systemd user services** (not system services)
+- **Control commands**: `systemctl --user <start|stop|restart|status> <service-name>`
+- **Log viewing**: `journalctl --user -u <service-name> --no-pager` or `podman logs <container-name>`
+- **Rootless operation**: All containers run without root privileges for security
+
+## Deployment Strategies
+- **Reverse Proxy (Recommended)**: Use NGINX for SSL termination and security layer
+- **Direct LAN Access**: Expose ports directly when SSL certificates unavailable
+- **Port Binding**: Use `${LOCALHOST_IP}` for reverse proxy, remove binding for LAN access
+- **Container Networking**: Use pasta (plain or with `--map-host-loopback,10.0.2.2`) — see `.cursor/rules/security-practices.mdc` for which variant each container needs. Only `node-exporter` uses `--network host`; slirp4netns is no longer used anywhere in the stack.
+
+## Troubleshooting Steps
+- **Logs**: `journalctl --user -u <service>` (systemd) or `podman logs <container>` (container)
+- **Container Status**: `podman ps -a` to check container state, `systemctl --user status <service>` for systemd
+- **Image Issues**: When `podman run` fails with 403 Forbidden, check Docker Hub for correct image name
+- **Permission Errors**: Ensure proper user management based on container documentation (PUID/PGID vs `--user` flag)
+- **Port Binding**: Verify ports are bound with `ss -tlnp | grep :PORT`, check container publish settings
+- **Environment Variables**: Cross-reference with official container documentation for required variables
+- **Metrics**: Prometheus/Grafana dashboards for system monitoring
+- **Network Issues**: Check Tailscale status and DNS resolution
+- **Performance**: Monitor with `podman stats` and system resources
+- **Common Issues**: Port conflicts, permission issues, network connectivity, incorrect image sources
+- **Container Version Changes**: Check LinuxServer documentation for breaking changes (e.g., HTTPS requirements)
+- **Quadlet Issues**: Run `systemctl --user daemon-reload` after config changes
+
+## Backup & Recovery
+- **Container Data**: Persistent volumes backed up regularly
+- **Configurations**: Version controlled configs backed up
+- **Database Dumps**: Automated dumps for database services
+- **Restore Process**: Documented procedures for service recovery

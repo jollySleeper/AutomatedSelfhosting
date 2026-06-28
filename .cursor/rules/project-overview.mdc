@@ -1,0 +1,67 @@
+---
+description: SelfHost project overview and architecture
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# SelfHost - Local Server Management Repository
+
+## Project Overview
+This repository manages a comprehensive self-hosted ecosystem running on a local server. It provides containerized services for media management, privacy-focused web frontends, monitoring, networking, and productivity tools using Podman as the container runtime.
+
+## Architecture & Technologies
+- **Container Runtime**: Podman (daemonless container management)
+- **Container Mode**: Rootless containers for enhanced security
+- **Reverse Proxy**: NGINX (configured in `apps/nginx/`)
+- **Network**: Tailscale for secure remote access
+- **Domain**: `aevion.lan` for local service access
+- **Infrastructure**: systemd user services for container lifecycle management
+- **Service Management**: `systemctl --user <action> <service-name>` for all services
+
+## Directory Structure
+- `apps/` - Individual service configurations and setup scripts
+- `bin/` - Custom utilities (podlet tool)
+- `scripts/` - Common utilities and automation scripts
+- Each app follows a consistent structure:
+  - `*.container` - Podman container definitions
+  - `podman-setup.sh` - Service installation script
+  - `environments/` - Environment variable configurations
+  - `configs/` - Service-specific configuration files
+
+## Service Categories
+- **Media Servers**: Jellyfin, Audiobookshelf, Navidrome, Immich
+- **Media Automation (*arr stack)**: Radarr, Sonarr, Lidarr, Readarr, Prowlarr, Seerr
+- **Download Clients**: qBittorrent, aria2 + AriaNg
+- **Media Analytics**: Jellystat
+- **Books**: Calibre, Calibre-Web-Automated
+- **Privacy Frontends**: Redlib, Nitter, LibMedium, AnonymousOverflow, Piped, etc.
+- **Infrastructure**: NGINX, Prometheus, Grafana, cAdvisor
+- **Networking**: AdGuard Home, Tailscale
+- **AI/ML**: Open WebUI, Qdrant, Postgres Vector
+- **Utilities**: File Browser, Syncthing, MKVToolNix
+
+## Key Conventions
+- **Ports**: Internal services use ports 8000-8888 range
+- **Environment Files**: Use `.env` files for configuration (never commit secrets)
+- **Container Names**: Follow `<service>.aevion.lan` naming pattern
+- **Scripts**: All setup scripts follow `podman-setup.sh` naming convention
+
+## Deployment Target
+- **Primary Server**: All services are deployed on the local server `legion@aevion`
+- **SSH Access**: `ssh legion@aevion` for server administration
+- **Deployment Method**: Use this repository to manage all service deployments on the server
+- **Local Development**: Test containers locally first, then deploy to server
+
+## Server Access
+- **SSH Access**: `ssh legion@aevion`
+- **Project Directory**: Repository cloned at `~/selfhost/` on server
+- **Local Domain**: Services accessible via `*.aevion.lan`
+- **External Access**: Via Tailscale VPN for remote access
+- **User Context**: All commands run as `legion` user with systemd user services
+
+## Development Guidelines
+- **Testing**: Always test container deployments locally before pushing
+- **Documentation**: Update READMEs when adding/modifying services
+- **Security**: Never commit sensitive data or private keys
+- **Consistency**: Follow existing patterns for new service additions
+- **Dependencies**: Check service interdependencies before modifications

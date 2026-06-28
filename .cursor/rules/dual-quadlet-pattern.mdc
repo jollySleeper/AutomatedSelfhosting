@@ -1,0 +1,96 @@
+---
+description: Dual-quadlet file convention — every service with non-trivial podman flags keeps an auto-generated <service>.container alongside a hand-written <service>.container-manual reference file for diffing, documentation, and emergency bootstrap. Not DNS-specific.
+globs: ["apps/**/*.container", "apps/**/*.container-manual", "apps/**/podman-setup.sh"]
+autoApply: true
+---
+
+# Dual-Quadlet Pattern (`<service>.container` + `<service>.container-manual`)
+
+A general convention for Podman quadlet files in this repo. Independent of DNS
+concerns. If the service you're adding also needs the DNS bypass, see the
+sister rule `podman-dns-bypass.mdc`.
+
+## The convention
+
+For every service that has **non-trivial** podman flags, commit **two** files
+side-by-side in the app folder:
+
+| File                        | Managed by                       | Purpose |
+|-----------------------------|----------------------------------|---------|
+| `<service>.container`        | `podlet` via `podman-setup.sh`   | The live quadlet. Symlinked into `~/.config/containers/systemd/<service>.container` on aevion. Regenerated from scratch every time `podman-setup.sh` runs. |
+| `<service>.container-manual` | Human                            | Clean, extensively commented reference. **Never installed.** Used for (a) diffing against the auto-generated file to detect podlet drift or missed directives, (b) explaining WHY each non-obvious flag exists, (c) emergency bootstrap if podlet breaks. |
+
+Both files are tracked in git. The `.container` is the actual install target;
+the `.container-manual` is documentation that never touches systemd.
+
+## When to add a `.container-manual`
+
+Add one whenever the service has any of:
+
+- **Post-generation quadlet surgery** — e.g. `Environment=CONTAINERS_CONF=/dev/null`
+  injected by `inject-quadlet-env`. The auto-generated file on disk will have
+  the injected line, but someone reading just the `podman-setup.sh` can easily
+  miss why the quadlet differs from what podlet produced. The manual file
+  documents this.
+- **Custom `[Service]` entries** that podlet cannot generate natively
+  (`Environment=`, `ExecStartPre=`, `ExecStopPost=`, `TimeoutStartSec=`,
+  non-default `Restart=` policies, etc.).
+- **Non-default networking** — custom `pasta:` arguments beyond the shared
+  defaults, dedicated bridges, host-loopback mappings that deviate from the
+  stack-wide norm.
+- **Volume subpath magic** — e.g. bind-mounting a sub-UID-owned host path that
+  requires a `podman unshare chown` step documented nearby.
+- **Unusual image behaviors** — baseimage quirks (Alpine/musl DNS, s6-overlay
+  init, init=dumb-init), unprivileged port bindings via `sysctl`, etc. — that
+  require prose to explain, not just a flag.
+
+For plain-vanilla services (a typical LinuxServer container on pasta with
+`--env-file` and nothing exotic), **skip the `.container-manual`** — the
+auto-generated file plus the `README.md` is self-documenting enough. Don't
+create noise.
+
+## Rules for `.container-manual` content
+
+1. **Include a header banner** stating clearly:
+   ```
+   # REFERENCE-ONLY. Not installed. The file `<service>.container` (no -manual suffix)
+   # is what actually runs. Regenerate that from `podman-setup.sh`.
+   ```
+2. **Explain every non-obvious directive with a comment.** A reader six months
+   from now should understand WHY, not just WHAT.
+3. **Keep it diff-friendly to the auto file.** Use the same ordering of
+   sections (`[Unit]`, `[Container]`, `[Service]`, `[Install]`) and the same
+   key ordering within sections as podlet emits. When you `diff` them the
+   difference should be (a) your comments and (b) intentional additions like
+   the injected `Environment=` line.
+4. **Don't hand-edit to fix a live issue.** If the auto file on aevion is
+   broken, fix `podman-setup.sh` (or the injected action) — not the manual
+   file. The manual file is documentation, not source of truth.
+
+## Workflow: regenerating and diffing
+
+When you bump Podman, change podlet, or add new flags:
+
+```bash
+# 1) Re-run setup on aevion
+ssh legion@aevion 'cd ~/selfhost/apps/<service> && bash podman-setup.sh'
+
+# 2) Pull the regenerated auto file back locally
+scp legion@aevion:~/selfhost/apps/<service>/<service>.container \
+    apps/<service>/<service>.container
+
+# 3) Diff against the manual reference (strip the manual file's comments first)
+diff <(grep -v '^#\|^$' apps/<service>/<service>.container) \
+     <(grep -v '^#\|^$' apps/<service>/<service>.container-manual)
+```
+
+Any unexpected divergence is a flag to investigate — did podlet drop a flag?
+Did the image change? Is a new version of Podman ignoring something?
+
+## Related
+
+- `podman-dns-bypass.mdc` — the rule that most commonly triggers the need
+  for a `.container-manual` file in this repo.
+- `apps/qbittorrent/qbittorrent.container-manual` → reference example.
+- `apps/adguardhome/adguardhome.container-manual` → reference example.
+- `bin/podlet` → the tool that generates the auto-file.

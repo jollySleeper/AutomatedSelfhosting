@@ -1,0 +1,173 @@
+---
+description: Security best practices and guidelines for SelfHost
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# SelfHost Security Best Practices
+
+## SelfHost Environment Security
+- **Server Access**: SSH access limited to `legion@aevion` with key-based authentication only
+- **Project Location**: Repository at `~/selfhost/` with restricted file permissions
+- **User Services**: All containers run as systemd user services under `legion` user
+- **Network Access**: Tailscale VPN provides encrypted remote access
+- **Local Network**: Services accessible via `*.aevion.lan` domain internally
+
+## Container Security
+- **Rootless Containers**: Run all services as non-root where possible for enhanced security
+- **Resource Limits**: Set appropriate CPU/memory limits for containers to prevent resource exhaustion
+- **Network Isolation**: Use internal networks for service-to-service communication
+- **Access Control**: Restrict external access through NGINX configurations
+
+## User Permissions in Containers
+- **Preferred Method**: Use `--userns keep-id --group-add $(id -g)` for proper user namespace isolation
+- **Avoid**: `--user $(id -u):$(id -g)` lacks full user namespace isolation and security
+- **Group Control**: Only add necessary groups with `--group-add`, avoid `--group-add keep-groups` to prevent over-permissioning
+- **Volume Permissions**: `--userns keep-id` eliminates need for `chmod 777` on mounted volumes
+- **Security Benefits**: Better isolation, explicit group control, cleaner permission handling
+- **Migration Path**: Replace `--user $(id -u):$(id -g)` with `--userns keep-id --group-add $(id -g)` in podman-setup.sh files
+
+## Secrets Management
+- **Never Commit Secrets**: Private keys, passwords, API keys should never be committed
+- **Environment Variables**: Use environment variables for all sensitive configuration
+- **Separate Environments**: Use different environment files for development vs production
+- **Access Control**: Limit SSH access and use key-based authentication
+
+## Container Networking & Host Loopback Access
+
+> **Deep-dive on this topic:** [`docs/HOST_LOOPBACK_SECURITY.md`](../../docs/HOST_LOOPBACK_SECURITY.md)
+> has the full threat model, enumerated remediation options with effort/impact
+> estimates, recommendation (bridge networks, phased), and a rollout plan.
+> Read that document before making non-trivial changes in this area.
+>
+> **Companion docs:** [`docs/DNS_ARCHITECTURE.md`](../../docs/DNS_ARCHITECTURE.md)
+> (how DNS works in this stack; critical context for pasta's `--dns-forward`
+> and the `169.254.1.1` intercept) and
+> [`docs/SLIRP4NETNS_TO_PASTA_MIGRATION.md`](../../docs/SLIRP4NETNS_TO_PASTA_MIGRATION.md)
+> (the April 2026 migration that got the whole stack onto pasta).
+
+### Default networking mode: pasta
+
+As of April 2026, **every** container on aevion uses pasta (the Podman 5.x
+default) except `node-exporter`, which intentionally runs with
+`--network host` to scrape host metrics. No container uses slirp4netns.
+
+Choose the right pasta flavor per container:
+
+- **Plain pasta** (`--network pasta`): container needs to reach the
+  internet and receive inbound via published ports, but does **not**
+  need to reach any other service on the host. This is the most
+  isolated option and should be the default for new containers.
+- **Pasta with DNS forward to AGH** (no extra flag — handled globally
+  in `podman/containers.conf` via `pasta_options = ["--dns-host",
+  "192.168.1.105"]`): applies to all pasta containers automatically.
+  See `docs/DNS_ARCHITECTURE.md`.
+- **Pasta with host loopback mapping**
+  (`--network 'pasta:--map-host-loopback,10.0.2.2'`): container needs
+  to connect to a service bound to `127.0.0.1` on the host. **Grants
+  access to every host loopback port** — use only when required.
+
+### The Problem: Host Loopback Mapping is All-or-Nothing
+
+Neither pasta nor slirp4netns supports restricting loopback access to
+specific ports. `--map-host-loopback` exposes the **entire** loopback
+address — if any container using it is compromised, the attacker can
+reach all of Postgres, Redis, qBittorrent, Jellyfin, `*arr` APIs,
+Prometheus, etc.
+
+This is the concern captured in [`TODOs.md`](../../TODOs.md) lines 3-4.
+**Current posture: accepted risk**, because the server is on a private
+LAN behind Tailscale. The full remediation analysis and recommended
+mitigations live in [`docs/HOST_LOOPBACK_SECURITY.md`](../../docs/HOST_LOOPBACK_SECURITY.md).
+
+### Containers that need `--map-host-loopback,10.0.2.2` today
+
+Containers that connect **outbound** to a host-bound service:
+
+- **NGINX**: reverse-proxies to all backends bound to `127.0.0.1`
+- **Prowlarr / Radarr / Sonarr / Lidarr / Readarr**: reach
+  qBittorrent @ `10.0.2.2:8061`
+- **Seerr**: reaches Jellyfin, Radarr, Sonarr
+- **Jellystat**: reaches Postgres, Jellyfin
+- **Grafana**: scrapes Prometheus
+- **Prometheus**: scrapes cadvisor, podman-exporter, node-exporter
+- **Goatsync / piped-api / wger-web / wger-celery-worker / wger-celery-beat / immich-\*** (when deployed): reach Postgres and Redis
+- **open-webui** (when deployed): reaches Ollama on host
+
+### Containers that should NOT use loopback mapping
+
+Containers that only **receive** connections or only talk to the public
+internet:
+
+- **qBittorrent, aria2, AriaNg**: download clients — receive connections
+- **FlareSolverr**: proxy receiver for Prowlarr
+- **Jellyfin, Audiobookshelf, Navidrome, Immich frontend**: media servers
+  serving content
+- **Privacy frontends** (Redlib, Nitter, Libremdb, Libmedium,
+  Anonymousoverflow, Quetre, Rimgo, Dumb, Qwiklip, etc.): outbound
+  internet only
+- **AdGuardHome**: serves DNS, doesn't initiate to host services
+
+For these, use plain `Network=pasta` in the quadlet and omit
+`--network` entirely from the `podman run` invocation (Podman 5.x
+defaults to pasta).
+
+### Future Hardening Options
+
+See [`docs/HOST_LOOPBACK_SECURITY.md`](../../docs/HOST_LOOPBACK_SECURITY.md)
+for the full analysis. Summary of top candidates:
+
+1. **Podman bridge networks, phased per service family** (recommended —
+   db_net, monitoring_net, arr_net, media_net). Reduces blast radius
+   from "any compromised container ≈ everything" to "compromised
+   container ≈ its family." Most practical incremental path.
+2. **Unix sockets for Postgres/Redis**: eliminates network access for
+   local clients. Best for individual apps when they support it.
+3. **Kubernetes / K3s with NetworkPolicies**: long-term direction,
+   aligns with the separate goal of learning K3s. Supersedes option 1
+   when done.
+4. **Podman pods**: good for tightly-coupled groups (wger stack, piped
+   stack, immich stack) — share one netns, talk via 127.0.0.1 within
+   the pod. Not a general solution.
+
+**Rejected** after analysis: in-container iptables (wrong abstraction
+layer), host-level nftables restricting per-source-IP (operational
+burden too high vs. alternatives).
+
+## Network Security
+- **Firewall Configuration**: Restrict access to only necessary ports
+- **SSL/TLS**: Use SSL termination with valid certificates
+- **VPN Access**: Use Tailscale for secure remote access
+- **DNS Security**: Use AdGuard Home for network-wide ad blocking and DNS protection
+
+## Service Exposure and Access Control
+- **Reverse Proxy (Preferred)**: NGINX provides SSL termination and access control layer
+- **Direct LAN Access**: Consider for local-only services when SSL certificates unavailable
+- **Port Binding Security**: Use `127.0.0.1` binding for reverse proxy, remove for LAN access
+- **Authentication Requirements**: Ensure services have built-in auth when not behind reverse proxy
+- **Network Segmentation**: Limit LAN exposure through firewall rules when possible
+
+## Update Management
+- **Regular Updates**: Keep container images and system packages updated
+- **Security Patches**: Apply security patches promptly
+- **Dependency Auditing**: Regularly audit container dependencies
+- **Backup Strategy**: Implement comprehensive backup procedures
+
+## Monitoring & Alerting
+- **Log Monitoring**: Regularly review logs for suspicious activity
+- **Intrusion Detection**: Monitor for unusual network patterns
+- **Access Logs**: Keep detailed access logs for security auditing
+- **Incident Response**: Have procedures for security incidents
+
+## Development Security
+- **Code Review**: Review all changes for security implications
+- **Least Privilege**: Grant minimum necessary permissions
+- **Input Validation**: Validate all inputs to prevent injection attacks
+- **Secure Defaults**: Use secure defaults and fail-safe configurations
+
+## Security Verification
+- **Container Inspection**: Use `podman inspect <container>` to verify security settings
+- **User Verification**: Confirm containers run as non-root users
+- **Volume Permissions**: Check that mounted volumes have appropriate permissions
+- **Port Exposure**: Verify only necessary ports are exposed
+- **Environment Audit**: Ensure no secrets are logged or exposed in container environments

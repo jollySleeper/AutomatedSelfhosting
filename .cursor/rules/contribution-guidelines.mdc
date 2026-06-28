@@ -1,0 +1,98 @@
+---
+description: Contribution guidelines for adding new services to SelfHost
+globs: ["apps/**/*", "**/README.md", "**/podman-setup.sh"]
+autoApply: true
+---
+
+# SelfHost Contribution Guidelines
+
+## SelfHost Development Workflow
+- **Local Development**: Test all changes locally first using `podman-setup.sh`
+- **Server Deployment**: Use `scp` to copy changes to `legion@aevion:~/selfhost/`
+- **Service Management**: Use `systemctl --user <action> <service-name>` for service control
+- **Verification**: Check `podman logs <container-name>` and service status after deployment
+- **Documentation**: Update relevant README files and deployment notes
+
+## Adding New Services
+- **Script-Driven Development**: Edit `podman-setup.sh` scripts - they generate quadlet files automatically
+- **Quadlets Are Generated**: Never create/edit `.container` files manually - run scripts to generate them
+- **Scripts Handle Everything**: `podman-setup.sh` manages container creation, quadlet generation, and systemd setup
+- **Follow Existing Patterns**: Copy structure from similar existing services
+- **Port Allocation**: Use next available port in 8000-8888 range
+- **Image Verification**: Check Docker Hub for correct image names, verify availability
+- **Environment Variables**: Research and document all required env vars (PUID, PGID, TZ, etc.)
+- **Volume Structure**: Plan required volumes including service-specific directories
+- **Documentation**: Include comprehensive README.md with setup instructions
+- **Testing**: Provide test procedures and health checks
+- **Security Review**: Ensure no secrets are committed, use environment variables
+
+## Service Structure Requirements
+```
+apps/new-service/
+├── *.container              # AUTO-GENERATED: Podman quadlet (don't edit directly)
+├── podman-setup.sh         # Service installation script (edit this)
+├── environments/
+│   ├── sample.env          # REQUIRED: Complete reference with ALL env vars documented
+│   └── local.env           # Local overrides only (gitignored for sensitive services)
+├── configs/                # Service-specific configurations
+├── volumes/                # Persistent data (gitignored)
+├── scripts/                # Helper scripts (init, rootless data, entrypoints)
+└── README.md               # Setup and usage documentation
+```
+
+### Sample Environment File Convention
+Every service MUST have a `sample.env` following the pattern in `apps/filebrowser/environments/sample.env`:
+- Header with image name, docs URL, and copy instruction
+- Variables grouped into `# ── Section ──` headers
+- Every possible env var documented with default value and description
+- Commented-out variables use defaults; uncommented are commonly overridden
+- Never include real secrets — use placeholder values like `changeme`
+- `local.env` contains ONLY values that differ from sample.env defaults
+
+**Important**: Edit `podman-setup.sh` and run it to generate `.container` files automatically.
+
+## Media Service Volume Convention
+- Media services (Radarr, Sonarr, Lidarr, Readarr) mount `$HOME/media:/media` for hardlinking support
+- Download clients mount `$HOME/media/Downloads:/downloads`
+- Library paths and download paths must share the same parent mount for hardlinks to work
+- See `docs/MEDIA_SERVER_GUIDE.md` for the complete directory structure
+
+## Environment Setup Prerequisites
+- **Podman**: Latest version with rootless container support
+- **Systemd**: User services enabled for automatic management
+- **Tailscale**: VPN client for secure remote access
+- **SSL Certificates**: Self-signed certificates for local development
+- **Environment Files**: Copy sample.env to local.env and configure
+
+## Quality Standards
+- **Error Handling**: Include proper error handling in scripts
+- **Logging**: Use consistent logging format across all scripts
+- **Resource Limits**: Set appropriate CPU/memory limits
+- **Health Checks**: Include health checks where possible
+- **Documentation**: Update all relevant documentation
+
+## Common Pitfalls to Avoid
+- **Don't assume LinuxServer images exist**: Always verify image availability on Docker Hub
+- **Don't assume user handling method**: Check documentation for PUID/PGID vs `--user` flag requirements
+- **Don't skip environment variables**: Research and include all mandatory env vars (TZ, PUID, PGID)
+- **Don't ignore service-specific volumes**: Some services need special directory structures
+- **Don't test endpoints without checking logs**: Always verify service is running via logs first
+
+## HTTPS and SSL Considerations
+- **Check Service Requirements**: Some services (like LinuxServer Calibre) require HTTPS by default
+- **SSL Certificate Strategy**: Decide between reverse proxy with SSL certificates vs direct LAN access
+- **Reverse Proxy Trade-offs**: Provides security layer but requires SSL certificates for HTTPS upstream
+- **Direct LAN Access**: Simpler for local networks but exposes ports to entire LAN
+- **Authentication**: Ensure services have built-in authentication when not behind reverse proxy
+
+## Testing Requirements
+- **Local Deployment**: Test container deployment locally first
+- **Integration Testing**: Verify service integration with NGINX
+- **Security Testing**: Ensure no security vulnerabilities
+- **Performance Testing**: Validate resource usage under load
+
+## Review Process
+- **Code Review**: All changes require review before merging
+- **Security Review**: Special attention to security implications
+- **Documentation Review**: Ensure documentation is complete and accurate
+- **Testing Verification**: Confirm all tests pass and functionality works
