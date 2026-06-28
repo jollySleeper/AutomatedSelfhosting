@@ -1,0 +1,17 @@
+[Unit]
+Description=seerr
+
+[Container]
+AutoUpdate=registry
+ContainerName=seerr
+EnvironmentFile=%h/selfhost/apps/seerr/environments/local.env
+Image=ghcr.io/seerr-team/seerr:latest
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=127.0.0.1:8068:5055
+Volume=%h/selfhost/apps/seerr/volumes/config:/app/config
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
