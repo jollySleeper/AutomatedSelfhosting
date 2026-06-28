@@ -1,0 +1,17 @@
+[Unit]
+Description=rimgo
+
+[Container]
+AutoUpdate=registry
+ContainerName=rimgo
+EnvironmentFile=%h/selfhost/apps/rimgo/environments/local.env
+Group=1001
+Image=codeberg.org/rimgo/rimgo:latest
+PublishPort=127.0.0.1:8019:3000
+User=1001
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
