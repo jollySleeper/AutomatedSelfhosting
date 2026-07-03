@@ -1,0 +1,17 @@
+[Unit]
+Description=wger-celery-beat
+
+[Container]
+AutoUpdate=registry
+ContainerName=wger-celery-beat
+Image=docker.io/wger/server:latest
+Network=pasta:--map-host-loopback,10.0.2.2
+Volume=%h/selfhost/apps/wger/volumes/wger-celery-beat/beat:/home/wger/beat
+EnvironmentFile=%h/selfhost/apps/wger/environments/wger-web.env
+Exec=/start-beat
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
