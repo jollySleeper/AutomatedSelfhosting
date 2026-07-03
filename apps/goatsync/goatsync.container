@@ -1,0 +1,17 @@
+[Unit]
+Description=goatsync
+
+[Container]
+AutoUpdate=registry
+ContainerName=goatsync
+EnvironmentFile=%h/selfhost/apps/goatsync/environments/local.env
+Image=ghcr.io/jollysleeper/goatsync:latest
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=127.0.0.1:8037:3735
+Volume=%h/selfhost/apps/goatsync/volumes/chunks:/data/chunks
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
