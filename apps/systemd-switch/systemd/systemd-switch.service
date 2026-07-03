@@ -1,0 +1,27 @@
+[Unit]
+Description=Service Control Panel (SysDwitch)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/legion/selfhost/apps/systemd-switch
+ExecStart=/home/legion/selfhost/apps/systemd-switch/sysdwitch
+Restart=always
+RestartSec=5
+
+# Environment
+EnvironmentFile=/home/legion/selfhost/apps/systemd-switch/environments/local.env
+
+# Security
+NoNewPrivileges=true
+ProtectHome=read-only
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+PrivateTmp=true
+PrivateDevices=true
+ReadWritePaths=/home/legion/selfhost
+
+[Install]
+WantedBy=default.target
