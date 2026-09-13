@@ -3,12 +3,12 @@
 function check_image () {
     echo "-> Checking for Existing '$1' Image"
     if [[ -z $(podman images -q "$1") ]]; then
-        echo "-> Image Doesnot Exsits"
+        echo "-> Image Does not Exist"
         export status=1
     else
-        echo "-> Image Already Exsits"
+        echo "-> Image Already Exists"
         export status=0
-    fi 
+    fi
 }
 
 function pull_image() {
@@ -36,4 +36,4 @@ function build_image() {
 
 function remove_old_images() {
     podman images --format '{{.Tag}},{{.ID}}' | grep '<none>' | cut -d ',' -f 2 | xargs podman rmi
-} 
+}
