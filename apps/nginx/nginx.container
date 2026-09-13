@@ -1,0 +1,42 @@
+[Unit]
+Description=nginx reverse proxy (rootless)
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Container]
+AutoUpdate=registry
+ContainerName=nginx
+Image=docker.io/library/nginx:stable-alpine
+UserNS=keep-id
+# Use pasta network for better performance (8x faster than slirp4netns for video streaming)
+# --map-host-loopback maps 10.0.2.2 to host's localhost, allowing access to backend services
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=80:1080/tcp
+PublishPort=443:1443/tcp
+# RAM-backed /tmp so proxy_buffering temp files don't wear the NVMe SSD.
+# Container /tmp defaults to overlay (SSD-backed); this overrides it with tmpfs (RAM).
+# 1GB is enough for ~4 concurrent buffered streams (256MB each).
+Tmpfs=/tmp:size=1G
+Volume=%h/selfhost/apps/nginx/configs/rootless/nginx.conf:/etc/nginx/nginx.conf
+Volume=%h/selfhost/apps/nginx/configs/snippets:/etc/nginx/snippets
+Volume=%h/selfhost/apps/nginx/configs/certs:/etc/nginx/certs
+Volume=%h/selfhost/apps/nginx/configs/sites:/etc/nginx/conf.d
+# Static landing page served by the home.aevion.lan dashboard (home.conf)
+Volume=%h/selfhost/apps/nginx/configs/html:/usr/share/nginx/html:ro
+# Basic Auth password file for the dashboard — uncomment when enabling auth
+# (see home.conf). The file must exist on the host first or the container
+# won't start, which is why it stays commented until you create it.
+#Volume=%h/selfhost/apps/nginx/configs/.htpasswd:/etc/nginx/.htpasswd:ro
+HealthCmd=/usr/bin/curl --fail http://127.0.0.1:1080/health || exit 1
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=30s
+HealthOnFailure=kill
+
+[Service]
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=default.target

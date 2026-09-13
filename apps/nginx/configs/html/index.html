@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tell the browser (and native UI like scrollbars/form controls) we support both schemes -->
+    <meta name="color-scheme" content="light dark">
+    <title>aevion.lan</title>
+    <style>
+        /* Light theme (default). The browser's preference decides which applies;
+           dark values are overridden in the prefers-color-scheme block below. */
+        :root {
+            --bg: #f4f6fb;
+            --heading: #1a202c;
+            --text: #334155;
+            --muted: #64748b;
+            --section-title: #94a3b8;
+            --divider: #e2e8f0;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --card-hover-bg: #eef2ff;
+            --card-hover-border: #5a7fff;
+            --card-name: #1e293b;
+            --accent: #4460e0;
+            --footer: #b2bccc;
+            --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1117;
+                --heading: #f7fafc;
+                --text: #e2e8f0;
+                --muted: #718096;
+                --section-title: #4a5568;
+                --divider: #1e2533;
+                --card-bg: #161b27;
+                --card-border: #222b3a;
+                --card-hover-bg: #1c2438;
+                --card-hover-border: #5a7fff;
+                --card-name: #f0f4ff;
+                --accent: #5a7fff;
+                --footer: #2d3748;
+                --card-shadow: none;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem 1.5rem 4rem;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 1.5rem;
+        }
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--heading);
+            letter-spacing: -0.5px;
+        }
+        header p {
+            color: var(--muted);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .section {
+            max-width: 1100px;
+            margin: 0 auto 2.5rem;
+        }
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--section-title);
+            margin-bottom: 0.85rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--divider);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 0.65rem;
+        }
+        a.card {
+            display: block;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+            text-decoration: none;
+            box-shadow: var(--card-shadow);
+            transition: border-color 0.18s, transform 0.18s, background 0.18s;
+        }
+        a.card:hover {
+            border-color: var(--card-hover-border);
+            background: var(--card-hover-bg);
+            transform: translateY(-2px);
+        }
+        .card-name {
+            font-weight: 600;
+            color: var(--card-name);
+            font-size: 0.92rem;
+        }
+        .card-url {
+            font-size: 0.78rem;
+            color: var(--accent);
+            margin-top: 0.2rem;
+        }
+        .card-desc {
+            font-size: 0.76rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+            line-height: 1.35;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            color: var(--footer);
+            font-size: 0.8rem;
+        }
+        @media (max-width: 600px) {
+            body { padding: 1rem; }
+            header h1 { font-size: 1.7rem; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>aevion.lan</h1>
+        <p>Self-hosted services — access each one via its subdomain</p>
+    </header>
+
+    <div class="section">
+        <div class="section-title">Media</div>
+        <div class="grid">
+            <a class="card" href="http://jf.aevion.lan">
+                <div class="card-name">Jellyfin</div>
+                <div class="card-url">jf.aevion.lan</div>
+                <div class="card-desc">Movies, TV &amp; music</div>
+            </a>
+            <a class="card" href="http://abs.aevion.lan">
+                <div class="card-name">Audiobookshelf</div>
+                <div class="card-url">abs.aevion.lan</div>
+                <div class="card-desc">Audiobooks &amp; podcasts</div>
+            </a>
+            <a class="card" href="http://navi.aevion.lan">
+                <div class="card-name">Navidrome</div>
+                <div class="card-url">navi.aevion.lan</div>
+                <div class="card-desc">Music streaming server</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Media Management</div>
+        <div class="grid">
+            <a class="card" href="http://seerr.aevion.lan">
+                <div class="card-name">Seerr</div>
+                <div class="card-url">seerr.aevion.lan</div>
+                <div class="card-desc">Media request management</div>
+            </a>
+            <a class="card" href="http://radarr.aevion.lan">
+                <div class="card-name">Radarr</div>
+                <div class="card-url">radarr.aevion.lan</div>
+                <div class="card-desc">Movie collection manager</div>
+            </a>
+            <a class="card" href="http://sonarr.aevion.lan">
+                <div class="card-name">Sonarr</div>
+                <div class="card-url">sonarr.aevion.lan</div>
+                <div class="card-desc">TV series manager</div>
+            </a>
+            <a class="card" href="http://lidarr.aevion.lan">
+                <div class="card-name">Lidarr</div>
+                <div class="card-url">lidarr.aevion.lan</div>
+                <div class="card-desc">Music collection manager</div>
+            </a>
+            <a class="card" href="http://readarr.aevion.lan">
+                <div class="card-name">Readarr</div>
+                <div class="card-url">readarr.aevion.lan</div>
+                <div class="card-desc">Book collection manager</div>
+            </a>
+            <a class="card" href="http://prowlarr.aevion.lan">
+                <div class="card-name">Prowlarr</div>
+                <div class="card-url">prowlarr.aevion.lan</div>
+                <div class="card-desc">Indexer manager</div>
+            </a>
+            <a class="card" href="http://qbt.aevion.lan">
+                <div class="card-name">qBittorrent</div>
+                <div class="card-url">qbt.aevion.lan</div>
+                <div class="card-desc">Torrent download client</div>
+            </a>
+            <a class="card" href="http://ariang.aevion.lan">
+                <div class="card-name">AriaNg</div>
+                <div class="card-url">ariang.aevion.lan</div>
+                <div class="card-desc">Aria2 download manager</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Privacy Frontends</div>
+        <div class="grid">
+            <a class="card" href="http://rd.aevion.lan">
+                <div class="card-name">Redlib</div>
+                <div class="card-url">rd.aevion.lan</div>
+                <div class="card-desc">Reddit — private frontend</div>
+            </a>
+            <a class="card" href="http://nitter.aevion.lan">
+                <div class="card-name">Nitter</div>
+                <div class="card-url">nitter.aevion.lan</div>
+                <div class="card-desc">Twitter/X — private frontend</div>
+            </a>
+            <a class="card" href="http://yt.aevion.lan">
+                <div class="card-name">Piped</div>
+                <div class="card-url">yt.aevion.lan</div>
+                <div class="card-desc">YouTube — private frontend</div>
+            </a>
+            <a class="card" href="http://ig.aevion.lan">
+                <div class="card-name">Qwiklip</div>
+                <div class="card-url">ig.aevion.lan</div>
+                <div class="card-desc">Instagram — private frontend</div>
+            </a>
+            <a class="card" href="http://imdb.aevion.lan">
+                <div class="card-name">Libremdb</div>
+                <div class="card-url">imdb.aevion.lan</div>
+                <div class="card-desc">IMDb — private frontend</div>
+            </a>
+            <a class="card" href="http://mid.aevion.lan">
+                <div class="card-name">Libmedium</div>
+                <div class="card-url">mid.aevion.lan</div>
+                <div class="card-desc">Medium — private frontend</div>
+            </a>
+            <a class="card" href="http://ao.aevion.lan">
+                <div class="card-name">AnonymousOverflow</div>
+                <div class="card-url">ao.aevion.lan</div>
+                <div class="card-desc">Stack Overflow — private frontend</div>
+            </a>
+            <a class="card" href="http://qo.aevion.lan">
+                <div class="card-name">Quetre</div>
+                <div class="card-url">qo.aevion.lan</div>
+                <div class="card-desc">Quora — private frontend</div>
+            </a>
+            <a class="card" href="http://dumb.aevion.lan">
+                <div class="card-name">Dumb</div>
+                <div class="card-url">dumb.aevion.lan</div>
+                <div class="card-desc">Genius — private frontend</div>
+            </a>
+            <a class="card" href="http://priviblur.aevion.lan">
+                <div class="card-name">Priviblur</div>
+                <div class="card-url">priviblur.aevion.lan</div>
+                <div class="card-desc">Tumblr — private frontend</div>
+            </a>
+            <a class="card" href="http://rimgo.aevion.lan">
+                <div class="card-name">Rimgo</div>
+                <div class="card-url">rimgo.aevion.lan</div>
+                <div class="card-desc">Imgur — private frontend</div>
+            </a>
+            <a class="card" href="http://gr.aevion.lan">
+                <div class="card-name">Biblioreads</div>
+                <div class="card-url">gr.aevion.lan</div>
+                <div class="card-desc">Goodreads — private frontend</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Productivity</div>
+        <div class="grid">
+            <a class="card" href="http://paperless.aevion.lan">
+                <div class="card-name">Paperless-NGX</div>
+                <div class="card-url">paperless.aevion.lan</div>
+                <div class="card-desc">Document management</div>
+            </a>
+            <a class="card" href="http://paisa.aevion.lan">
+                <div class="card-name">Paisa</div>
+                <div class="card-url">paisa.aevion.lan</div>
+                <div class="card-desc">Personal finance manager</div>
+            </a>
+            <a class="card" href="http://budget.aevion.lan">
+                <div class="card-name">Actual Budget</div>
+                <div class="card-url">budget.aevion.lan</div>
+                <div class="card-desc">Budgeting &amp; spending tracker</div>
+            </a>
+            <a class="card" href="http://sure.aevion.lan">
+                <div class="card-name">Sure</div>
+                <div class="card-url">sure.aevion.lan</div>
+                <div class="card-desc">Personal finance &amp; wealth dashboard</div>
+            </a>
+            <a class="card" href="http://wger.aevion.lan">
+                <div class="card-name">Wger</div>
+                <div class="card-url">wger.aevion.lan</div>
+                <div class="card-desc">Workout &amp; fitness tracker</div>
+            </a>
+            <a class="card" href="http://bh.aevion.lan">
+                <div class="card-name">BeaverHabits</div>
+                <div class="card-url">bh.aevion.lan</div>
+                <div class="card-desc">Habit tracking</div>
+            </a>
+            <a class="card" href="http://calibre-web-automated.aevion.lan">
+                <div class="card-name">Calibre-Web</div>
+                <div class="card-url">calibre-web-automated.aevion.lan</div>
+                <div class="card-desc">eBook library</div>
+            </a>
+            <a class="card" href="http://fb.aevion.lan">
+                <div class="card-name">File Browser</div>
+                <div class="card-url">fb.aevion.lan</div>
+                <div class="card-desc">Web-based file manager</div>
+            </a>
+            <a class="card" href="http://pairdrop.aevion.lan">
+                <div class="card-name">PairDrop</div>
+                <div class="card-url">pairdrop.aevion.lan</div>
+                <div class="card-desc">Peer-to-peer file sharing</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">AI</div>
+        <div class="grid">
+            <a class="card" href="http://ai.aevion.lan">
+                <div class="card-name">Open WebUI</div>
+                <div class="card-url">ai.aevion.lan</div>
+                <div class="card-desc">LLM chat interface (Ollama)</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Infrastructure</div>
+        <div class="grid">
+            <a class="card" href="http://agh.aevion.lan">
+                <div class="card-name">AdGuard Home</div>
+                <div class="card-url">agh.aevion.lan</div>
+                <div class="card-desc">DNS &amp; network ad blocking</div>
+            </a>
+            <a class="card" href="http://jellystat.aevion.lan">
+                <div class="card-name">Jellystat</div>
+                <div class="card-url">jellystat.aevion.lan</div>
+                <div class="card-desc">Jellyfin analytics</div>
+            </a>
+            <a class="card" href="http://goatsync.aevion.lan">
+                <div class="card-name">GoatSync</div>
+                <div class="card-url">goatsync.aevion.lan</div>
+                <div class="card-desc">Calendar &amp; contacts sync (EteSync)</div>
+            </a>
+            <a class="card" href="http://sync.aevion.lan">
+                <div class="card-name">Syncthing</div>
+                <div class="card-url">sync.aevion.lan</div>
+                <div class="card-desc">Continuous file synchronization</div>
+            </a>
+            <a class="card" href="http://speedtest.aevion.lan">
+                <div class="card-name">Speedtest Tracker</div>
+                <div class="card-url">speedtest.aevion.lan</div>
+                <div class="card-desc">Network speed monitoring</div>
+            </a>
+            <a class="card" href="http://control.aevion.lan">
+                <div class="card-name">systemd-switch</div>
+                <div class="card-url">control.aevion.lan</div>
+                <div class="card-desc">Control systemd user services</div>
+            </a>
+        </div>
+    </div>
+
+    <footer>aevion — self-hosted, always-on</footer>
+</body>
+</html>
