@@ -1,7 +1,9 @@
 #!/bin/bash
 
 LOCALHOST_IP="127.0.0.1"
-SELFHOSTED_APPS_PATH="$HOME/selfhost/apps"
+# Allow overriding the root directory; default keeps current behavior
+SELFHOST_ROOT_DIR=${SELFHOST_ROOT_DIR:-$HOME/selfhost}
+SELFHOSTED_APPS_PATH="$SELFHOST_ROOT_DIR/apps"
 REL_DIR=$(echo ${BASH_SOURCE[0]} | sed "s|/common.sh||")
 
 function print_install() {
@@ -28,6 +30,10 @@ function source_container() {
     source ${REL_DIR}/podman/container.sh
 }
 
+function source_pod() {
+    source ${REL_DIR}/podman/pod.sh
+}
+
 function source_image() {
     source ${REL_DIR}/podman/image.sh
 }
@@ -43,11 +49,22 @@ function generate_nginx_conf_file() {
 
     echo "-> Making Nginx Confg File for '$subdomain'"
     cp "$template" "$conf_file"
-    sed -i "s|{{subdomain}}|$subdomain|g" "$conf_file"
-    sed -i "s|{{domain}}|$domain|g" "$conf_file"
-    sed -i "s|{{tld}}|$tld|g" "$conf_file"
-    sed -i "s|{{port}}|$port|g" "$conf_file"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s|{{subdomain}}|$subdomain|g" "$conf_file"
+        sed -i '' "s|{{domain}}|$domain|g" "$conf_file"
+        sed -i '' "s|{{tld}}|$tld|g" "$conf_file"
+        sed -i '' "s|{{port}}|$port|g" "$conf_file"
+    else
+        sed -i "s|{{subdomain}}|$subdomain|g" "$conf_file"
+        sed -i "s|{{domain}}|$domain|g" "$conf_file"
+        sed -i "s|{{tld}}|$tld|g" "$conf_file"
+        sed -i "s|{{port}}|$port|g" "$conf_file"
+    fi
+
+    echo "-> Restarting Nginx Service"
+    systemctl --user restart nginx
 }
+
 function action_based_on_query() {
     appName=${2}
     imageSource=${3}
@@ -60,6 +77,39 @@ function action_based_on_query() {
         "stop-con")
             source_container
             stop_container_and_exit "$appName"
+            ;;
+        "start-pod")
+            source_pod
+            start_pod_and_exit "$appName"
+            ;;
+        "stop-pod")
+            source_pod
+            stop_pod_and_exit "$appName"
+            ;;
+        "generate-con-quadlet")
+            sleep 5
+            source_container
+            generate_container_quadlet "$appName"
+            ;;
+        "install-con-quadlet")
+            source_container
+            install_container_quadlet "$appName" ${3}
+            cd "$SELFHOSTED_APPS_PATH/$3"
+            ;;
+        "inject-quadlet-env")
+            # Usage: action_based_on_query "inject-quadlet-env" "$NAME" "Environment=KEY=VALUE"
+            # Inserts the given line under [Service] in the generated quadlet.
+            # Call between "generate-con-quadlet" and "install-con-quadlet".
+            source_container
+            inject_env_into_quadlet "$appName" "${3}"
+            ;;
+        "install-pod-quadlet")
+            source_pod
+            install_pod_quadlet "$appName"
+            cd "$SELFHOSTED_APPS_PATH/$appName"
+            ;;
+        "generate-systemd")
+            echo "Deprecated"
             ;;
         "generate-nginx-conf-file")
             generate_nginx_conf_file "$appName" ${3} ${4} ${5} ${6}
@@ -74,6 +124,24 @@ function action_based_on_query() {
             remove_container "$appName"
             source_image
             pull_image "$appName" "$imageSource"
+            ;;
+        "-pod")
+            # Install
+            source_pod
+            print_install "$appName"
+            stop_pod "$appName"
+            remove_pod "$appName"
+            ;;
+        "bootstrap-con")
+            # New: Bootstrap single container with direct quadlet creation
+            echo "-> Bootstrapping $appName with direct quadlet creation"
+            source_container
+            stop_container "$appName"
+            remove_container "$appName"
+            source_image
+            pull_image "$appName" "$imageSource"
+            echo "-> Create $appName.container file directly, then run:"
+            echo "   systemctl --user daemon-reload && systemctl --user start $appName.service"
             ;;
         *)
             echo "lol"
