@@ -1,1 +1,67 @@
 .stfolder
+
+# nginx Basic Auth password file — contains hashed credentials, never commit
+apps/nginx/configs/.htpasswd
+
+# Coturn credentials and generated PairDrop ICE configuration
+apps/coturn/environments/local.env
+apps/pairdrop/volumes/config/rtc_config.json
+
+# OS, editor and dependency artifacts
+.DS_Store
+node_modules/
+.venv/
+__pycache__/
+*.bak
+
+# Runtime data and application profiles
+volumes/
+apps/firefox/config/
+
+# Backup copies of app folders
+apps/calibre.bak/
+apps/tailscale.bak/
+
+# Podlet binaries (see bin/README.md for versions and checksums)
+bin/podlet
+bin/podlet_*
+
+# Certificates and private keys
+apps/nginx/configs/certs/
+*.pem
+*.key
+
+# Live environment files (commit sanitized sample*.env / example.env only)
+apps/*/environments/local.env
+apps/*/environments/*.env.bak
+apps/adguard-tailscale/environments/tailscale.env
+apps/audiobookshelf/environments/rootless.env
+apps/immich/environments/server.env
+apps/immich/environments/server-old.env
+apps/nitter/environments/nitter.env
+apps/nitter/environments/nitter2.env
+apps/piped/environments/piped-db.env
+apps/piped/environments/piped-proxy.env
+apps/postgres-vector/environments/db.env
+apps/tailscale/environments/tailscale.env
+apps/wger/environments/wger-db.env
+apps/wger/environments/wger-web.env
+
+# Live configuration (commit sanitized *.sample / *.example files only)
+apps/adguardhome/configs/AdGuardHome.yaml
+apps/adguard-tailscale/configs/adguardhome/AdGuardHome.yaml
+apps/aria2/configs/local.aria2.conf.overrides
+apps/grafana/configs/grafana.ini
+apps/nitter/configs/nitter.conf
+apps/piped/configs/piped-api.properties
+apps/priviblur/configs/config.toml
+
+# Chat transcripts
+chats/
+/cursor_*.md
+apps/jellyfin/past_chats/
+
+# Personal data
+myexpenses/
+apps/wger/scripts/trale*
+apps/wger/scripts/bulk-weight-import.sql
