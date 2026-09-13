@@ -1,0 +1,16 @@
+{
+  "sdpSemantics": "unified-plan",
+  "iceServers": [
+    {
+      "urls": "stun:turn.aevion.lan:3478"
+    },
+    {
+      "urls": [
+        "turn:turn.aevion.lan:3478?transport=udp",
+        "turn:turn.aevion.lan:3478?transport=tcp"
+      ],
+      "username": "pairdrop",
+      "credential": "changeme"
+    }
+  ]
+}

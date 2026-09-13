@@ -1,0 +1,16 @@
+[Unit]
+Description=pairdrop
+
+[Container]
+AutoUpdate=registry
+ContainerName=pairdrop
+EnvironmentFile=%h/selfhost/apps/pairdrop/environments/local.env
+Image=lscr.io/linuxserver/pairdrop:1.11.2
+PublishPort=127.0.0.1:8034:3000
+Volume=%h/selfhost/apps/pairdrop/volumes/config:/config
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
