@@ -1,0 +1,30 @@
+[Unit]
+Description=coturn
+
+[Container]
+AddCapability=net_bind_service
+AutoUpdate=registry
+ContainerName=coturn
+DropCapability=all
+EnvironmentFile=%h/selfhost/apps/coturn/environments/local.env
+Exec=-n '--log-file=stdout' '--listening-port=3478' '--min-port=49160' '--max-port=49200' --fingerprint --lt-cred-mech --no-tls --no-multicast-peers --unauthorized-ratelimit '--total-quota=24' '--user-quota=12' '--realm=$${TURN_REALM}' '--user=$${TURN_USERNAME}:$${TURN_PASSWORD}'
+HealthCmd=turnutils_stunclient -p 3478 127.0.0.1
+HealthInterval=30s
+HealthRetries=3
+HealthStartPeriod=10s
+HealthTimeout=10s
+Image=docker.io/coturn/coturn:4.18.0
+NoNewPrivileges=true
+PodmanArgs=--cpus 2 --memory 256m
+PublishPort=3478:3478/tcp
+PublishPort=3478:3478/udp
+PublishPort=49160-49200:49160-49200/udp
+ReadOnly=true
+Tmpfs=/tmp:rw,noexec,nosuid,nodev,size=16m
+Tmpfs=/var/lib/coturn:rw,noexec,nosuid,nodev,size=16m
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

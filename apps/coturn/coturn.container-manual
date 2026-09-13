@@ -1,0 +1,59 @@
+# REFERENCE-ONLY. Not installed. The file `coturn.container` (no -manual suffix)
+# is what actually runs. Regenerate that from `podman-setup.sh`.
+#
+# Keep this file aligned with the generated Quadlet. It documents the
+# post-generation systemd-dollar escaping, the direct TURN port mappings, and
+# the least-privilege controls that are easy to miss in podlet output.
+
+[Unit]
+Description=coturn
+
+[Container]
+# The image runs turnserver as nobody. This is its only effective capability,
+# required because 3478 is below the kernel's privileged-port boundary.
+AddCapability=net_bind_service
+AutoUpdate=registry
+ContainerName=coturn
+DropCapability=all
+
+# This mode-0600, Git-ignored file holds the realm, username, and password.
+EnvironmentFile=%h/selfhost/apps/coturn/environments/local.env
+
+# -n declares command-line-only configuration. TLS/DTLS and the admin CLI stay
+# disabled; clients use authenticated plain TURN on the trusted LAN/Tailnet.
+# The doubled dollars are intentional post-generation surgery: systemd reduces
+# $$ to $, then the image entrypoint expands the variables from EnvironmentFile.
+Exec=-n '--log-file=stdout' '--listening-port=3478' '--min-port=49160' '--max-port=49200' --fingerprint --lt-cred-mech --no-tls --no-multicast-peers --unauthorized-ratelimit '--total-quota=24' '--user-quota=12' '--realm=$${TURN_REALM}' '--user=$${TURN_USERNAME}:$${TURN_PASSWORD}'
+
+# STUN proves that the UDP listener answers without placing credentials in a
+# health-check command. Authenticated allocation is a separate deployment test.
+HealthCmd=turnutils_stunclient -p 3478 127.0.0.1
+HealthInterval=30s
+HealthRetries=3
+HealthStartPeriod=10s
+HealthTimeout=10s
+Image=docker.io/coturn/coturn:4.18.0
+
+# Prevent file-capability or setuid-based privilege gains.
+NoNewPrivileges=true
+
+# Bound damage from accidental or abusive relay load.
+PodmanArgs=--cpus 2 --memory 256m
+
+# TURN is not HTTP-proxied. Its listener and relay ports must be reachable
+# directly by browsers on the LAN/Tailnet. Only UDP needs the relay range.
+PublishPort=3478:3478/tcp
+PublishPort=3478:3478/udp
+PublishPort=49160-49200:49160-49200/udp
+
+# Coturn needs no persistent writable filesystem. Runtime paths are isolated,
+# size-limited tmpfs mounts with execution, devices, and setuid disabled.
+ReadOnly=true
+Tmpfs=/tmp:rw,noexec,nosuid,nodev,size=16m
+Tmpfs=/var/lib/coturn:rw,noexec,nosuid,nodev,size=16m
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
