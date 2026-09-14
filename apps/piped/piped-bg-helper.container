@@ -1,0 +1,20 @@
+[Unit]
+Description=piped-bg-helper
+# BG Helper Server for PoToken generation
+# Should start before piped-api for proper initialization
+
+[Container]
+AutoUpdate=registry
+ContainerName=piped-bg-helper
+Group=1001
+Image=docker.io/1337kavin/bg-helper-server:latest
+PublishPort=127.0.0.1:8024:3000
+User=1001
+
+[Service]
+Restart=always
+# Clean up any stale container resources before starting
+ExecStartPre=-/usr/bin/podman container cleanup piped-bg-helper
+
+[Install]
+WantedBy=default.target

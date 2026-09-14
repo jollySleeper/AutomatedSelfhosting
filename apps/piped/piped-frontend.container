@@ -1,0 +1,24 @@
+[Unit]
+Description=piped-frontend
+# Start after both API and Proxy are up
+After=piped-api.service piped-proxy.service
+Wants=piped-api.service piped-proxy.service
+
+[Container]
+AutoUpdate=registry
+ContainerName=piped-frontend
+Group=1001
+Image=docker.io/1337kavin/piped-frontend:latest
+PublishPort=127.0.0.1:8021:8080
+User=1001
+Volume=%h/selfhost/apps/piped/configs/piped-frontend-rootless-tmp-nginx.conf:/etc/nginx/nginx.conf
+Volume=%h/selfhost/apps/piped/volumes/piped-frontend/nginx-off:/etc/nginx/off
+Volume=%h/selfhost/apps/piped/scripts/frontend-entrypoint-replace.sh:/entrypoint.sh
+
+[Service]
+Restart=always
+# Clean up any stale container resources before starting
+ExecStartPre=-/usr/bin/podman container cleanup piped-frontend
+
+[Install]
+WantedBy=default.target

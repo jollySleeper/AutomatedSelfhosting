@@ -1,0 +1,23 @@
+[Unit]
+Description=piped-api
+# Start after postgres-vector database and bg-helper are available
+After=postgres-vector.service piped-bg-helper.service
+Wants=postgres-vector.service piped-bg-helper.service
+
+[Container]
+AutoUpdate=registry
+ContainerName=piped-api
+Group=1001
+Image=ghcr.io/jollysleeper/piped-backend:feature-feed-freshness-fix-2
+Network=pasta:--map-host-loopback,10.0.2.2
+PublishPort=127.0.0.1:8022:8081
+User=1001
+Volume=%h/selfhost/apps/piped/configs/piped-api.properties:/app/config.properties:ro
+
+[Service]
+Restart=always
+# Clean up any stale container resources before starting
+ExecStartPre=-/usr/bin/podman container cleanup piped-api
+
+[Install]
+WantedBy=default.target

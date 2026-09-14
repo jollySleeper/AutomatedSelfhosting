@@ -1,0 +1,22 @@
+[Unit]
+Description=piped-proxy
+# Start after the API is up to ensure proper initialization order
+After=piped-api.service
+Wants=piped-api.service
+
+[Container]
+AutoUpdate=registry
+ContainerName=piped-proxy
+EnvironmentFile=%h/selfhost/apps/piped/environments/piped-proxy.env
+Group=1001
+Image=docker.io/1337kavin/piped-proxy:latest
+PublishPort=127.0.0.1:8023:8082
+User=1001
+
+[Service]
+Restart=always
+# Clean up any stale container resources before starting
+ExecStartPre=-/usr/bin/podman container cleanup piped-proxy
+
+[Install]
+WantedBy=default.target
