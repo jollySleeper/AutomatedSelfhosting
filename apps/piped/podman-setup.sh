@@ -26,7 +26,7 @@ Wants=postgres-vector.service piped-bg-helper.service
 AutoUpdate=registry
 ContainerName=piped-api
 Group=1001
-Image=ghcr.io/jollysleeper/piped-backend:feature-feed-freshness-fix-2
+Image=ghcr.io/jollysleeper/piped-backend:fix-upstream-newpipe-extractor
 Network=pasta:--map-host-loopback,10.0.2.2
 PublishPort=127.0.0.1:8022:8081
 User=1001
@@ -271,7 +271,9 @@ for name in "${CONTAINERS[@]}"; do
         # NOTE: Now Using Centralized PostgreSQL Container
         image_source="docker.io/postgres:15-alpine"
     elif [[ "$name" == "piped-api" ]]; then
-        image_source="ghcr.io/jollysleeper/piped-backend:feature-feed-freshness-fix-2"
+        image_source="ghcr.io/jollysleeper/piped-backend:fix-upstream-newpipe-extractor"
+        # image_source="ghcr.io/jollysleeper/piped-backend:feature-feed-freshness-fix-2"
+        # image_source="docker.io/1337kavin/piped:latest"
     elif [[ "$name" == "piped-bg-helper" ]]; then
         # BG Helper Server for PoToken generation
         image_source="docker.io/1337kavin/bg-helper-server:latest"
@@ -287,7 +289,7 @@ for name in "${CONTAINERS[@]}"; do
 
     # Write the quadlet file with proper dependencies and cleanup
     # This replaces the auto-generated quadlet with our customized version
-    # write_container_quadlet "$name"
+    write_container_quadlet "$name"
 done
 
 echo "Done :)"
