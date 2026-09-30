@@ -4,8 +4,8 @@ Description=priviblur
 [Container]
 AutoUpdate=registry
 ContainerName=priviblur
-Image=ghcr.io/jollysleeper/priviblur:master
-PublishPort=127.0.0.1:8110:8000
+Image=quay.io/syeopite/priviblur:latest
+PublishPort=127.0.0.1:8010:8000
 Volume=%h/selfhost/apps/priviblur/configs/config.toml:/priviblur/config.toml:ro,Z
 
 [Service]

@@ -4,8 +4,8 @@ source ../../scripts/common.sh
 
 NAME="priviblur"
 
-IMAGE_SOURCE="ghcr.io/jollysleeper/$NAME:master"
-PORT="8110"
+IMAGE_SOURCE="quay.io/syeopite/$NAME:latest"
+PORT="8010"
 
 action_based_on_query "$1-con" "$NAME" "$IMAGE_SOURCE"
 

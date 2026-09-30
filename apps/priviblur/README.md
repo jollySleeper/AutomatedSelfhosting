@@ -70,7 +70,7 @@ Priviblur uses configuration file instead of environment variables.
 
 ### Container Details
 
-- **Image**: `ghcr.io/jollysleeper/priviblur:master`
+- **Image**: `quay.io/syeopite/priviblur:latest`
 - **Ports**: Internal 8000 → External 8010 (localhost)
 - **Volumes**: `configs/config.toml:/priviblur/config.toml:ro,Z` - Configuration file
 - **Networks**: plain pasta (stateless privacy frontend — outbound internet only, no host services needed)
@@ -245,7 +245,7 @@ podman logs -f priviblur
 ```bash
 # Container updates automatically via registry
 # Manual update if needed
-podman pull ghcr.io/jollysleeper/priviblur:master
+podman pull quay.io/syeopite/priviblur:latest
 systemctl --user restart priviblur
 ```
 
