@@ -1,6 +1,5 @@
 [Unit]
-Description=MKVToolNix - Matroska file manipulation GUI
-Documentation=https://github.com/jlesage/docker-mkvtoolnix
+Description=mkvtoolnix
 
 [Container]
 AutoUpdate=registry
@@ -10,9 +9,7 @@ Image=docker.io/jlesage/mkvtoolnix:latest
 PublishPort=5800:5800
 Volume=%h/selfhost/apps/mkvtoolnix/volumes/config:/config
 Volume=%h/media:/storage
-
-[Service]
-# Restart=always  # Disabled for on-demand usage - uncomment to restore auto-restart
+Volume=/mnt/ssd/home/Media:/storage-ssd
 
 [Install]
 WantedBy=default.target
