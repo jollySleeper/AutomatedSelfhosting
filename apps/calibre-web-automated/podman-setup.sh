@@ -12,6 +12,7 @@ mkdir -p "$(get_vol_dir ${NAME})"
 mkdir -p "$(get_vol_dir ${NAME})/book-ingest"
 
 echo "-> Running '$NAME' Container"
+#-p ${LOCALHOST_IP}:8083:8083 \
 podman run \
  --detach \
  --replace \
@@ -19,8 +20,8 @@ podman run \
  --label io.containers.autoupdate=registry \
  --env PUID=$(id -u) \
  --env PGID=$(id -g) \
+ -p 8083:8083 \
  --env-file "$(get_env_dir ${NAME})/local.env" \
- -p ${LOCALHOST_IP}:8083:8083 \
  -v "$(get_vol_dir ${NAME})":/config \
  -v "$(get_vol_dir ${NAME})/book-ingest":/cwa-book-ingest \
  -v ~/media/Books:/calibre-library \
