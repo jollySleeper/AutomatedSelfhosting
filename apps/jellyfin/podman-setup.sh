@@ -3,7 +3,8 @@
 source ../../scripts/common.sh
 
 NAME="jellyfin"
-IMAGE_SOURCE="ghcr.io/$NAME/$NAME:latest"
+# Pinned to the 10.11 line: the transcoding issue is fixed in 10.11.7 (tested).
+IMAGE_SOURCE="ghcr.io/$NAME/$NAME:10.11"
 
 action_based_on_query "$1-con" "$NAME" "$IMAGE_SOURCE"
 

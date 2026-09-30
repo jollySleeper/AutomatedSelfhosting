@@ -11,12 +11,13 @@ Annotation=run.oci.keep_original_groups=1
 AutoUpdate=registry
 ContainerName=jellyfin
 HostName=jellyfin
-Image=ghcr.io/jellyfin/jellyfin:latest
+Image=ghcr.io/jellyfin/jellyfin:10.11
 PodmanArgs=--entrypoint /entrypoint.sh --privileged
 PublishPort=127.0.0.1:8041:8096/tcp
 Volume=%h/selfhost/apps/jellyfin/volumes/config:/config
 Volume=%h/selfhost/apps/jellyfin/volumes/cache:/cache
 Volume=%h/media:/media
+Volume=/mnt/ssd/home/Media:/media-ssd
 Volume=%h/selfhost/apps/jellyfin/scripts/entrypoint-root.sh:/entrypoint.sh
 
 [Service]

@@ -85,7 +85,7 @@ Jellyfin uses default configuration with no environment variables in this setup.
 
 ### Container Details
 
-- **Image**: `ghcr.io/jellyfin/jellyfin:latest`
+- **Image**: `ghcr.io/jellyfin/jellyfin:10.11`
 - **Ports**: Internal 8096 → External 8041 (localhost)
 - **Volumes**:
   - `volumes/config:/config` - Application configuration and database
@@ -284,7 +284,7 @@ With `proxy_buffering off`, NGINX passes data through in tiny chunks. When Wi-Fi
 ```bash
 # Container updates automatically via registry
 # Manual update if needed
-podman pull ghcr.io/jellyfin/jellyfin:latest
+podman pull ghcr.io/jellyfin/jellyfin:10.11
 systemctl --user restart jellyfin
 ```
 
