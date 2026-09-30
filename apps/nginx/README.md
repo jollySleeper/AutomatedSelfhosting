@@ -109,6 +109,7 @@ All backends run on the host, reached via `10.0.2.2:<port>`.
 | 8032 | **File Browser** | `fb`, `filebrowser` | Web-based file manager |
 | 8033 | **Paperless-ngx** | `paperless`, `docs` | Document management |
 | 8034 | **PairDrop** | `pairdrop`, `pd`, `drop` | Peer-to-peer file sharing (AirDrop alternative) |
+| 8035 | **Vaultwarden** | `vault` (`vw`, `vaultwarden` redirect) | Bitwarden-compatible password manager (HTTPS only) |
 | 8037 | **GoatSync** | `goatsync` | EteSync-compatible calendar/contacts sync |
 | 8041 | **Jellyfin** | `jf`, `jellyfin` | Media server (movies, TV, music) |
 | 8042 | **Audiobookshelf** | `abs`, `audiobookshelf` | Audiobook and podcast server |
@@ -155,7 +156,7 @@ plain-TURN, private-realm configuration.
 
 - **8000–8019**: Privacy-focused alternative frontends
 - **8020–8029**: Piped (YouTube) stack
-- **8030–8039**: Sync, files, documents (Syncthing, File Browser, Paperless, PairDrop, GoatSync)
+- **8030–8039**: Sync, files, documents, passwords (Syncthing, File Browser, Paperless, PairDrop, Vaultwarden, GoatSync)
 - **8040–8049**: Media servers (Jellyfin, Audiobookshelf, Navidrome)
 - **8050–8059**: Fitness, habits, and personal finance
 - **8060–8069**: *arr stack, download clients, media requests/analytics

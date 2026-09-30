@@ -1,0 +1,26 @@
+[Unit]
+Description=vaultwarden
+
+[Container]
+AutoUpdate=registry
+ContainerName=vaultwarden
+DropCapability=all
+EnvironmentFile=%h/selfhost/apps/vaultwarden/environments/local.env
+HealthCmd=/healthcheck.sh
+HealthInterval=30s
+HealthRetries=3
+HealthStartPeriod=30s
+HealthTimeout=10s
+Image=docker.io/vaultwarden/server:1.37.3
+NoNewPrivileges=true
+PodmanArgs=--cpus 2 --group-add 1001 --memory 512m
+PublishPort=127.0.0.1:8035:8080
+ReadOnly=true
+UserNS=keep-id
+Volume=%h/selfhost/apps/vaultwarden/volumes/data:/data
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
