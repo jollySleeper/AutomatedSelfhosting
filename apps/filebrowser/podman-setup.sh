@@ -12,9 +12,6 @@ echo "-> Making Required Directories"
 mkdir -pv "$(get_vol_dir ${NAME})/database"
 mkdir -pv "$(get_vol_dir ${NAME})/config"
 
-echo "-> Giving Permissions to the Directories"
-# chmod -R 777 "$(get_vol_dir ${NAME})/database"
-chmod -R 777 "$(get_vol_dir ${NAME})/config"
 
 # Function to run the container (callable for debugging)
 run_container() {
@@ -22,9 +19,9 @@ run_container() {
     podman run \
      --detach \
      --replace \
-     --label io.containers.autoupdate=registry \
      --userns keep-id \
      --group-add $(id -g) \
+     --label io.containers.autoupdate=registry \
      --env-file "$(get_env_dir ${NAME})/local.env" \
      -p ${LOCALHOST_IP}:$PORT:8080 \
      -v "$(get_vol_dir ${NAME})/database":/database \

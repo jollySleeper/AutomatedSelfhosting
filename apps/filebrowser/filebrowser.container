@@ -1,21 +1,17 @@
 [Unit]
-Description=File Browser - Web-based file manager
-Documentation=https://filebrowser.org/
+Description=filebrowser
 
 [Container]
 AutoUpdate=registry
 ContainerName=filebrowser
 EnvironmentFile=%h/selfhost/apps/filebrowser/environments/local.env
-Group=1001
 Image=docker.io/filebrowser/filebrowser:latest
+PodmanArgs=--group-add 1001
 PublishPort=127.0.0.1:8032:8080
-User=1001
+UserNS=keep-id
 Volume=%h/selfhost/apps/filebrowser/volumes/database:/database
 Volume=%h/selfhost/apps/filebrowser/volumes/config:/config
 Volume=%h/media:/srv
-
-[Service]
-# Restart=always  # Disabled for on-demand usage - uncomment to restore auto-restart
 
 [Install]
 WantedBy=default.target
