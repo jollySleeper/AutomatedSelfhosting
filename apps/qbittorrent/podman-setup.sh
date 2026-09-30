@@ -48,6 +48,7 @@ echo "-> Running '$NAME' Container"
 # =============================================================================
 CONTAINERS_CONF=/dev/null podman run \
  --detach \
+ --replace \
  --restart unless-stopped \
  --label io.containers.autoupdate=registry \
  --env-file "$(get_env_dir ${NAME})/local.env" \
@@ -56,8 +57,8 @@ CONTAINERS_CONF=/dev/null podman run \
  -p ${LOCALHOST_IP}:8061:8061 \
  -p 6881:6881 \
  -p 6881:6881/udp \
- -v "$(get_vol_dir ${NAME})/config":/config \
  -v "$HOME/media/Downloads":/downloads \
+ -v "$(get_vol_dir ${NAME})/config":/config \
  --name "$NAME" \
  "$IMAGE_SOURCE"
 
