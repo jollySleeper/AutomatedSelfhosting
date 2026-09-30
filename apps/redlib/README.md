@@ -84,7 +84,7 @@ cd ~/selfhost/apps/redlib
 
 ### Container Details
 
-- **Image**: `quay.io/redlib/redlib:latest`
+- **Image**: `ghcr.io/cycneuramus/containers:redlib` (temporary fix; upstream is `quay.io/redlib/redlib:latest`)
 - **Ports**: Internal 8080 → External 8013 (localhost)
 - **Volumes**: None (stateless service)
 - **Networks**: plain pasta (stateless privacy frontend — outbound internet only, no host services needed)
@@ -266,7 +266,7 @@ podman logs -f redlib
 ```bash
 # Container updates automatically via registry
 # Manual update if needed
-podman pull quay.io/redlib/redlib:latest
+podman pull ghcr.io/cycneuramus/containers:redlib
 systemctl --user restart redlib
 ```
 

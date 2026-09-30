@@ -6,7 +6,7 @@ AutoUpdate=registry
 ContainerName=redlib
 EnvironmentFile=%h/selfhost/apps/redlib/environments/safe.env
 Group=1001
-Image=quay.io/redlib/redlib:latest
+Image=ghcr.io/cycneuramus/containers:redlib
 PublishPort=127.0.0.1:8013:8080
 User=1001
 

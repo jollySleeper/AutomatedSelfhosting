@@ -3,7 +3,9 @@
 source ../../scripts/common.sh
 
 NAME="redlib"
-IMAGE_SOURCE="quay.io/$NAME/$NAME:latest"
+# IMAGE_SOURCE="quay.io/$NAME/$NAME:latest"
+# Temp Fix
+IMAGE_SOURCE="ghcr.io/cycneuramus/containers:$NAME"
 
 action_based_on_query "$1-con" "$NAME" "$IMAGE_SOURCE"
 
