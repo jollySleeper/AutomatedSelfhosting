@@ -18,7 +18,7 @@ podman run \
  --label io.containers.autoupdate=registry \
  --user $(id -u):$(id -g) \
  --env-file "$(get_env_dir ${NAME})/local.env" \
- -p ${LOCALHOST_IP}:8015:3000 \
+ -p ${LOCALHOST_IP}:8045:80 \
  --name "$NAME" \
  "$IMAGE_SOURCE"
 

@@ -21,7 +21,7 @@ Hyperpipe offers an alternative way to access YouTube content with enhanced priv
 
 - **System Requirements**: Minimum 256MB RAM, modern web browser
 - **Dependencies**: None (standalone service, though backend may be needed)
-- **Network**: HTTP port 8015 (web UI), internet access for YouTube API
+- **Network**: HTTP port 8045 (web UI), internet access for YouTube API
 - **Storage**: Minimal (no persistent storage required)
 
 ## Installation & Deployment
@@ -29,6 +29,8 @@ Hyperpipe offers an alternative way to access YouTube content with enhanced priv
 ### Current Status
 
 **Note**: This service is currently on hold as it may require a backend component that is not yet configured in this setup.
+
+**Upstream status**: Hyperpipe has been [discontinued](https://codeberg.org/Hyperpipe/Hyperpipe) by its developers. The image still works but will not receive fixes.
 
 ### Quick Deploy (When Ready)
 
@@ -44,10 +46,10 @@ cd ~/selfhost/apps/hyperpipe
    cd ~/selfhost/apps/hyperpipe
    ```
 
-2. **Configure Environment (if needed)**
+2. **Configure Environment (required)**
    ```bash
-   # Environment file: environments/local.env (if created)
-   # Configuration options for YouTube API access
+   cp environments/sample.env environments/local.env
+   # Set PIPED_API and HYP_API; the container exits if either is missing
    ```
 
 3. **Deploy Container**
@@ -68,21 +70,24 @@ cd ~/selfhost/apps/hyperpipe
 
 ### Environment Variables
 
-No environment variables currently configured.
+The image's entrypoint exits unless both variables are set (see `environments/sample.env`):
+
+- `PIPED_API`: Piped API hostname, e.g. `piped-api.aevion.lan`
+- `HYP_API`: Hyperpipe backend hostname
 
 ## Configuration
 
 ### Container Details
 
 - **Image**: `codeberg.org/hyperpipe/hyperpipe:latest`
-- **Ports**: Internal 3000 → External 8015 (localhost)
+- **Ports**: Internal 80 → External 8045 (localhost)
 - **Volumes**: None (stateless service)
 - **Networks**: plain pasta (stateless privacy frontend — outbound internet only, no host services needed)
 
 ### Service Configuration
 
 Hyperpipe is configured for basic YouTube frontend functionality:
-- **Port**: 3000 (internal container port)
+- **Port**: 80 (internal container port, nginx)
 - **Privacy Mode**: Designed for privacy-focused YouTube access
 - **API Integration**: YouTube API proxy for content access
 
@@ -93,7 +98,7 @@ Hyperpipe follows a simple frontend architecture:
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   User Browser  │───▶│   Hyperpipe      │───▶│   YouTube API   │
-│                 │    │   (localhost:8015) │    │                 │
+│                 │    │   (localhost:8045) │    │                 │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                               │
                               ▼
@@ -113,7 +118,7 @@ Hyperpipe follows a simple frontend architecture:
 
 ### Accessing the Service
 
-- **Local Access**: http://localhost:8015
+- **Local Access**: http://localhost:8045
 - **Domain Access**: https://hyperpipe.aevion.lan
 - **API Endpoints**: None (web interface only)
 
@@ -189,7 +194,7 @@ systemctl --user is-active hyperpipe
 podman ps | grep hyperpipe
 
 # Web interface check
-curl -I http://localhost:8015
+curl -I http://localhost:8045
 ```
 
 ### Logs
