@@ -4,8 +4,8 @@ Description=speedtest-tracker
 [Container]
 AutoUpdate=registry
 ContainerName=speedtest-tracker
-EnvironmentFile=%h/selfhost/apps/speedtest-tracker/environments/speedtest.env
-Image=lscr.io/linuxserver/speedtest-tracker:latest
+EnvironmentFile=%h/selfhost/apps/speedtest-tracker/environments/local.env
+Image=lscr.io/linuxserver/speedtest-tracker:1.12.4
 PublishPort=127.0.0.1:8054:80
 Volume=%h/selfhost/apps/speedtest-tracker/volumes/config:/config
 
