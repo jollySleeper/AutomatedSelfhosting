@@ -27,6 +27,6 @@ action_based_on_query "generate-con-quadlet" "$NAME"
 action_based_on_query "install-con-quadlet" "$NAME" "$NAME"
 
 # Generate NGINX Conf File
-action_based_on_query "generate-nginx-conf-file" "$NAME" "aevion" "lan" "8053" "http"
+# action_based_on_query "generate-nginx-conf-file" "$NAME" "aevion" "lan" "8053" "http"
 
 echo "Done :)"
