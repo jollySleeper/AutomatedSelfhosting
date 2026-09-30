@@ -313,8 +313,8 @@ podman logs piped-db
 **YouTube Live Stream Spinner**
 - Symptoms: Livestream media downloads, but the frontend remains buffering
 - Cause: Shaka cannot reconcile the separate live audio/video HLS timelines
-- Solution: See [workarounds](LIVE_STREAM_PLAYBACK.md) and the
-  [full investigation](LIVE_STREAM_INVESTIGATION.md)
+- Solution: Play the stream with hls.js or an external player instead of the
+  Piped frontend; hls.js handles the same HLS master correctly
 
 **Database Connection Issues**
 - Symptoms: User data not saving, subscriptions lost

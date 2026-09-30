@@ -14,11 +14,8 @@ All cross-cutting infrastructure docs, runbooks, and guides live under
 Highlights:
 
 - [`docs/DNS_ARCHITECTURE.md`](./docs/DNS_ARCHITECTURE.md) — end-to-end DNS flow (AGH, Tailscale, pasta, `containers.conf`, per-container `--dns` bypass, AAAA policy, the Podman 5.x `--dns` append quirk).
-- [`docs/STATIC_IP_SETUP.md`](./docs/STATIC_IP_SETUP.md) — how aevion's static IP (`192.168.1.105`) is pinned via NetworkManager, plus a general Linux static-IP reference.
-- [`docs/IPV6_SETUP.md`](./docs/IPV6_SETUP.md) — future-enablement guide for turning IPv6 back on (router + AGH) without letting traffic bypass AGH.
-- [`docs/NETWORK_FAILOVER_PLAN.md`](./docs/NETWORK_FAILOVER_PLAN.md) / [`docs/SSL_SETUP_SUMMARY.md`](./docs/SSL_SETUP_SUMMARY.md) — WAN failover + HTTPS setup.
-- [`docs/MEDIA_SERVER_GUIDE.md`](./docs/MEDIA_SERVER_GUIDE.md) / [`docs/HDD_MEDIA_MIGRATION_GUIDE.md`](./docs/HDD_MEDIA_MIGRATION_GUIDE.md) — *arr-stack setup and HDD migration runbook.
-- [`docs/FUTURE_SERVICES.md`](./docs/FUTURE_SERVICES.md) / [`docs/TODOs.md`](./docs/TODOs.md) / [`docs/README_TEMPLATE.md`](./docs/README_TEMPLATE.md) — planning, personal notes, and the per-service README template.
+- [`docs/MEDIA_SERVER_GUIDE.md`](./docs/MEDIA_SERVER_GUIDE.md) — *arr-stack setup.
+- [`docs/README_TEMPLATE.md`](./docs/README_TEMPLATE.md) — the per-service README template.
 
 App-specific docs stay inside each `apps/<service>/README.md`.
 

@@ -29,7 +29,7 @@
 
 ## 1. The concrete concern
 
-From [`TODOs.md`](../TODOs.md) lines 3-4:
+As originally noted:
 
 > We have to map the host to containers even if we need a single port as
 > all of our container ports are mapped to `127.0.0.1` of our bare metal
@@ -312,8 +312,8 @@ Example: one pod for `wger`:
 
 > Migrate the whole stack to K3s. Use Cilium/Calico NetworkPolicy
 > resources to specify which pod can talk to which pod on which port.
-> Declarative, enforceable, and aligns with `TODOs.md` line 6-10 (user
-> wants to learn K3s anyway).
+> Declarative, enforceable, and aligns with the separate goal of
+> learning K3s.
 
 **Pros:**
 
@@ -528,8 +528,8 @@ These don't solve the loopback problem but reduce compromise probability:
    + `--cap-add=` for specific services. Most apps don't need any caps.
 4. **`--read-only` root filesystem + specific writable tmpfs mounts.**
    Prevents an attacker from modifying the container at runtime.
-5. **Podman secrets instead of env-var passwords.** Already a
-   [`TODOs.md`](../TODOs.md) line-16 item. Do it.
+5. **Podman secrets instead of env-var passwords.** Already on the
+   to-do list. Do it.
 6. **`no-new-privileges` security opt.** Already default in rootless
    podman, but double-check: `podman inspect <c> --format
    '{{.HostConfig.SecurityOpt}}'` should show it.
@@ -568,4 +568,3 @@ If you're not sure when you'll have time:
 - [`.cursor/rules/security-practices.mdc`](../.cursor/rules/security-practices.mdc)
   — current security policies and accepted-risk notes. Update when any
   phase of Option 2 lands.
-- [`TODOs.md`](../TODOs.md) — where this concern was first captured.

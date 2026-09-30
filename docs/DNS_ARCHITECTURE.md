@@ -65,8 +65,7 @@
 - Interface `enP4p65s0`: `ipv4.method=manual`,
   `ipv4.addresses=192.168.1.105/24`, `ipv4.gateway=192.168.1.1`.
 - Static IP is configured **on the server** (not DHCP reservation on the
-  router). Survives OpenWRT router reboots — see
-  [`docs/STATIC_IP_SETUP.md`](./STATIC_IP_SETUP.md).
+  router). Survives OpenWRT router reboots.
 - NM's `ipv4.dns=192.168.1.105` is set but effectively overridden at runtime
   by Tailscale's `accept-dns=true`.
 
@@ -439,7 +438,6 @@ This is formalized in the rule
 - AGH: `aaaa_disabled: true` in `AdGuardHome.yaml`. AGH returns empty AAAA
   responses to all clients, so applications don't bother trying IPv6 and
   then time out. Matches the "pure IPv4 architecture" intent.
-- See [`docs/IPV6_SETUP.md`](./IPV6_SETUP.md) for a future-enablement plan.
 
 ### 2.9 Tailscale DNS policy (unchanged)
 
@@ -586,7 +584,8 @@ container, which is exactly the `10.0.2.2` case (§5.2) in disguise.
 
 ### 5.2 "Option A" — universal `--map-host-loopback,10.0.2.2`
 
-Rejected — opposed by the `TODOs.md` security concern.
+Rejected — it would give every container access to all host loopback ports
+(see [`HOST_LOOPBACK_SECURITY.md`](./HOST_LOOPBACK_SECURITY.md)).
 
 Would require adding `--map-host-loopback,10.0.2.2` to every container,
 which exposes **all** host loopback ports (PostgreSQL on 5432,
@@ -707,8 +706,8 @@ functional.
 | `.cursor/rules/podman-dns-bypass.mdc` | convention | `CONTAINERS_CONF=/dev/null` bypass pattern |
 | `.cursor/rules/dual-quadlet-pattern.mdc` | convention | `<svc>.container-manual` reference-file convention |
 | Server file system | `~/.config/containers/containers.conf` | synced from `podman/containers.conf` |
-| Router | IPv6 on LAN | disabled (see `docs/IPV6_SETUP.md` for future enablement) |
-| Host | Static IP | `192.168.1.105` (NetworkManager, manual — see `docs/STATIC_IP_SETUP.md`) |
+| Router | IPv6 on LAN | disabled |
+| Host | Static IP | `192.168.1.105` (NetworkManager, manual) |
 | Host | `tailscale set --accept-dns` | `true` (unchanged) |
 | Tailscale | Tailnet DNS resolver | `100.64.10.1` (aevion) |
 | Podman version tested | | `5.4.1` on aevion |

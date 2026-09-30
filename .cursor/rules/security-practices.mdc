@@ -75,7 +75,7 @@ address — if any container using it is compromised, the attacker can
 reach all of Postgres, Redis, qBittorrent, Jellyfin, `*arr` APIs,
 Prometheus, etc.
 
-This is the concern captured in [`TODOs.md`](../../TODOs.md) lines 3-4.
+This is a known, open concern.
 **Current posture: accepted risk**, because the server is on a private
 LAN behind Tailscale. The full remediation analysis and recommended
 mitigations live in [`docs/HOST_LOOPBACK_SECURITY.md`](../../docs/HOST_LOOPBACK_SECURITY.md).
