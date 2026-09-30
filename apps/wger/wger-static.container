@@ -1,7 +1,5 @@
 [Unit]
-Description=wger Static Files Server
-Requires=wger-web.service
-After=wger-web.service
+Description=wger-static
 
 [Container]
 AutoUpdate=registry
